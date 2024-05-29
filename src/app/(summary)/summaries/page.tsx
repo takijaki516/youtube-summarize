@@ -1,10 +1,13 @@
 import Link from "next/link";
 import ytdl from "ytdl-core";
+import { Eye, Tv } from "lucide-react";
 
 import { prismaDB } from "@/lib/prisma-db";
+import { Embed } from "@/components/embed";
+import { Badge } from "@/components/ui/badge";
 
 const SummariesPage = async () => {
-  const summaries = await prismaDB.summaries.findMany({
+  const summaries = await prismaDB.videos.findMany({
     orderBy: {
       createdAt: "desc",
     },
@@ -25,11 +28,39 @@ const SummariesPage = async () => {
     <section>
       <div>
         {summaries.map(async (summary) => {
-          const videoInfo = await ytdl.getInfo(summary.videosId);
+          const videoInfo = await ytdl.getInfo(summary.videoId);
+
           return (
             videoInfo && (
-              <Link>
-                <div></div>
+              <Link href={`/${summary.videoId}`}>
+                <div>
+                  <Embed
+                    thumbnail={
+                      videoInfo.videoDetails.thumbnails.reverse()[0].url
+                    }
+                  />
+                  <div>
+                    <h1>{videoInfo.videoDetails.title}</h1>
+                    <p>
+                      {videoInfo.videoDetails.description &&
+                      videoInfo.videoDetails.description?.length > 100
+                        ? videoInfo.videoDetails.description
+                            ?.slice(0, 100)
+                            .concat("...")
+                        : videoInfo.videoDetails.description}
+                    </p>
+                    <div>
+                      <Badge>
+                        <Tv />
+                        {videoInfo.videoDetails.author.name}
+                      </Badge>
+                      <Badge>
+                        <Eye />
+                        {videoInfo.videoDetails.viewCount}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
               </Link>
             )
           );

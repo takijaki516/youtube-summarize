@@ -7,12 +7,10 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Badge } from "./ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuLabel,
-  DropdownMenuGroup,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
   DropdownMenuRadioGroup,
@@ -21,13 +19,14 @@ import {
 import { Button } from "./ui/button";
 import { Form, FormControl, FormField, FormItem } from "./ui/form";
 import { Input } from "./ui/input";
+import { handleInitialFormSubmit } from "@/app/actions";
 
 export const formSchema = z.object({
   link: z.string().describe("the youtube video you would like to summarize"),
   model: z.enum(["gpt-3.5-turbo", "gpt-4o", "llama3"]),
 });
 
-export const InitialForm = () => {
+export const SummarizeForm = () => {
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -40,10 +39,18 @@ export const InitialForm = () => {
   return (
     <Form {...form}>
       <form
-      className="flex flex-col"
-      onSubmit={form.handleSubmit(async (data) => {
-        await handle
-      })}
+        className="flex flex-col"
+        onSubmit={form.handleSubmit(async (data) => {
+          await handleInitialFormSubmit(data).then((value: string | null) => {
+            if (value) {
+              toast.info("Redirecting...");
+
+              return router.push(`/${value}`);
+            }
+            toast.error("error generating summary, please try again later.");
+            return router.refresh(); // REVIEW: does this revalidate cache?
+          });
+        })}
       >
         <div>
           <FormField

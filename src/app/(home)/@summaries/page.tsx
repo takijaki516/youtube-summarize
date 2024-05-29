@@ -18,7 +18,7 @@ const SummariesPage = async () => {
     <section>
       <div>
         {summaries.map(async (summary) => {
-          const videoInfo = await ytdl.getInfo(summary.videosId);
+          const videoInfo = await ytdl.getInfo(summary.videoId);
 
           return (
             videoInfo && (
