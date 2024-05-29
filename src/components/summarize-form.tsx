@@ -39,7 +39,7 @@ export const SummarizeForm = () => {
   return (
     <Form {...form}>
       <form
-        className="flex flex-col"
+        className="flex flex-col w-full items-start gap-2 md:flex-row"
         onSubmit={form.handleSubmit(async (data) => {
           await handleInitialFormSubmit(data).then((value: string | null) => {
             if (value) {
@@ -52,16 +52,16 @@ export const SummarizeForm = () => {
           });
         })}
       >
-        <div>
+        <div className="flex w-full gap-2 md:max-w-2xl">
           <FormField
             disabled={form.formState.isSubmitting}
             control={form.control}
             name="link"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full">
                 <FormControl>
                   <Input
-                    placeholder="https://www.youtube.com/watch"
+                    placeholder="https://www.youtube.com/....."
                     {...field}
                   />
                 </FormControl>
@@ -83,11 +83,11 @@ export const SummarizeForm = () => {
                       variant={"secondary"}
                       size={"icon"}
                     >
-                      <Settings2 />
+                      <Settings2 className="size-4" />
                     </Button>
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent>
+                  <DropdownMenuContent className="w-full">
                     <DropdownMenuLabel>choose a model</DropdownMenuLabel>
                     <DropdownMenuSeparator />
 
@@ -100,7 +100,8 @@ export const SummarizeForm = () => {
                       </DropdownMenuRadioItem>
                       <DropdownMenuRadioItem value="gpt-4o">
                         gpt-4o
-                        <DropdownMenuRadioItem value="llama3"></DropdownMenuRadioItem>
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="llama3">
                         llama3
                       </DropdownMenuRadioItem>
                     </DropdownMenuRadioGroup>
@@ -113,17 +114,17 @@ export const SummarizeForm = () => {
 
         <Button
           disabled={form.formState.isSubmitting}
-          className="group"
+          className="group w-full md:max-w-fit"
           type="submit"
         >
           {form.formState.isSubmitting ? (
             <>
-              <Loader />
+              <Loader className="size-4 animate-spin duration-1000" />
             </>
           ) : (
             <>
               Summarize
-              <ListVideo />
+              <ListVideo className="ml-2 size-4 transition-all duration-200 group-hover:ml-4" />
             </>
           )}
         </Button>
