@@ -38,7 +38,7 @@ export const sstYoutubeVideo = async (link: string) => {
     });
 
     formData.append("model", "whisper-1");
-    formData.append("timestamp_granularities", ["word"]);
+    formData.append("timestamp_granularities", '["word"]');
     formData.append("response_format", "verbose_json");
 
     const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
@@ -49,6 +49,7 @@ export const sstYoutubeVideo = async (link: string) => {
         ...formData.getHeaders(),
       },
     });
+
     const response: any = await res.json();
     const transcription = response.text;
     return transcription;

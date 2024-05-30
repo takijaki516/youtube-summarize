@@ -136,5 +136,10 @@ export const searchUsingTavilly = async (summary: string) => {
     input: summary,
   });
 
+  console.log(
+    "🚀 ~ file: web-search.ts:138 ~ searchUsingTavilly ~ result:",
+    result
+  );
+
   return JSON.stringify(result);
 };

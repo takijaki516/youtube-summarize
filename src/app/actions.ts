@@ -61,7 +61,7 @@ export const handleInitialFormSubmit = async (
         throw new Error("Could not summarize the transcript");
       }
 
-      await prismaDB.videos.update({
+      const updatedVideo = await prismaDB.videos.update({
         where: {
           videoId: videoId,
         },
@@ -70,10 +70,11 @@ export const handleInitialFormSubmit = async (
         },
       });
 
-      return videoId;
+      return updatedVideo.id;
     }
 
     const transcript = await transcriptVideo(formData.link);
+
     if (!transcript) {
       throw new Error("Could not get transcript");
     }

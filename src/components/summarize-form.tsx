@@ -29,33 +29,35 @@ export const formSchema = z.object({
 export const SummarizeForm = () => {
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const summaryForm = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       model: "gpt-3.5-turbo",
     },
   });
 
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    await handleInitialFormSubmit(data).then((value: string | null) => {
+      if (value) {
+        toast.info("Redirecting...");
+
+        return router.push(`/${value}`);
+      }
+      toast.error("error generating summary, please try again later.");
+      return router.refresh(); // REVIEW: does this revalidate cache?
+    });
+  };
+
   return (
-    <Form {...form}>
+    <Form {...summaryForm}>
       <form
         className="flex flex-col w-full items-start gap-2 md:flex-row"
-        onSubmit={form.handleSubmit(async (data) => {
-          await handleInitialFormSubmit(data).then((value: string | null) => {
-            if (value) {
-              toast.info("Redirecting...");
-
-              return router.push(`/${value}`);
-            }
-            toast.error("error generating summary, please try again later.");
-            return router.refresh(); // REVIEW: does this revalidate cache?
-          });
-        })}
+        onSubmit={summaryForm.handleSubmit(onSubmit)}
       >
         <div className="flex w-full gap-2 md:max-w-2xl">
           <FormField
-            disabled={form.formState.isSubmitting}
-            control={form.control}
+            disabled={summaryForm.formState.isSubmitting}
+            control={summaryForm.control}
             name="link"
             render={({ field }) => (
               <FormItem className="w-full">
@@ -70,15 +72,15 @@ export const SummarizeForm = () => {
           />
 
           <FormField
-            disabled={form.formState.isSubmitting}
-            control={form.control}
+            disabled={summaryForm.formState.isSubmitting}
+            control={summaryForm.control}
             name="model"
             render={({ field }) => (
               <FormItem>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      disabled={form.formState.isSubmitting}
+                      disabled={summaryForm.formState.isSubmitting}
                       className="group"
                       variant={"secondary"}
                       size={"icon"}
@@ -95,7 +97,7 @@ export const SummarizeForm = () => {
                       value={field.value}
                       onValueChange={field.onChange}
                     >
-                      <DropdownMenuRadioItem value="gpt-3-turbo">
+                      <DropdownMenuRadioItem value="gpt-3.5-turbo">
                         gpt-3-turbo
                       </DropdownMenuRadioItem>
                       <DropdownMenuRadioItem value="gpt-4o">
@@ -113,11 +115,11 @@ export const SummarizeForm = () => {
         </div>
 
         <Button
-          disabled={form.formState.isSubmitting}
+          disabled={summaryForm.formState.isSubmitting}
           className="group w-full md:max-w-fit"
           type="submit"
         >
-          {form.formState.isSubmitting ? (
+          {summaryForm.formState.isSubmitting ? (
             <>
               <Loader className="size-4 animate-spin duration-1000" />
             </>

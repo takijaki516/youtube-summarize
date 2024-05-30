@@ -34,22 +34,21 @@ export const RegenerateSummary = ({ videoId }: { videoId: string }) => {
     },
   });
 
+  const onSubmit = async (
+    data: z.infer<typeof RegenerateSummaryFormSchema>
+  ) => {
+    await handleRegenerateSummary(data).then(async (res) => {
+      if (!res) {
+        return toast.error("An error occurred while regenerating the summary");
+      }
+
+      return toast.success("Summary regenerated successfully");
+    });
+  };
+
   return (
     <Form {...regenerateForm}>
-      <form
-        className="flex"
-        onSubmit={regenerateForm.handleSubmit(async (data) => {
-          await handleRegenerateSummary(data).then(async (res) => {
-            if (!res) {
-              return toast.error(
-                "An error occurred while regenerating the summary"
-              );
-            }
-
-            return toast.success("Summary regenerated successfully");
-          });
-        })}
-      >
+      <form className="flex" onSubmit={regenerateForm.handleSubmit(onSubmit)}>
         <FormField
           disabled={regenerateForm.formState.isSubmitting}
           control={regenerateForm.control}

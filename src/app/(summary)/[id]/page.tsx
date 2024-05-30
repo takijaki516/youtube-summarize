@@ -13,7 +13,7 @@ interface IVideoSummaryPageProps {
 const VideoSummaryPage = async ({ params }: IVideoSummaryPageProps) => {
   const videoSummary = await prismaDB.videos.findUnique({
     where: {
-      videoId: params.id,
+      id: params.id,
     },
   });
 
@@ -31,16 +31,25 @@ const VideoSummaryPage = async ({ params }: IVideoSummaryPageProps) => {
   const videoInfo = await ytdl.getInfo(videoSummary.videoId);
 
   return (
-    <section>
-      <div>
-        <div>
-          <div>
+    <section className="container mt-10 grid w-full grid-cols-1 gap-10 md:grid-cols-3">
+      <div className="flex flex-col gap-10 md:col-span-2">
+        <div className="flex flex-col items-start bg-secondary p-5">
+          <div
+            className="flex flex-col w-full items-center 
+          justify-between gap-5 md:flex-row md:items-center"
+          >
             <Embed
               thumbnail={videoInfo.videoDetails.thumbnails.reverse()[0].url}
             />
-            <div>
-              <h1>{videoInfo.videoDetails.title}</h1>
-              <p>
+
+            <div className="flex w-full flex-col gap-2">
+              <h1
+                className="text-md text-center font-extrabold
+              leading-tight tracking-tighter md:text-left md:text-lg"
+              >
+                {videoInfo.videoDetails.title}
+              </h1>
+              <p className="text-center text-xs text-muted-foreground md:text-left">
                 {videoInfo.videoDetails.description &&
                 videoInfo.videoDetails.description?.length > 100
                   ? videoInfo.videoDetails.description
@@ -48,27 +57,34 @@ const VideoSummaryPage = async ({ params }: IVideoSummaryPageProps) => {
                       .concat("...")
                   : videoInfo.videoDetails.description}
               </p>
-              <div>
+              <div
+                className="mt-3 flex flex-row items-center justify-center
+              gap-4 md:items-center md:justify-start"
+              >
                 <Badge>
-                  <Tv />
+                  <Tv className="size-3 mr-2" />
                   {videoInfo.videoDetails.author.name}
                 </Badge>
+
                 <Badge variant={"outline"}>
-                  <Eye />
+                  <Eye className="size-3 mr-2" />
                   {videoInfo.videoDetails.viewCount}
                 </Badge>
               </div>
             </div>
           </div>
         </div>
-        <div>
+
+        <div
+          className="flex flex-col w-full items-start gap-5 rounded-xl p-5
+        text-justify outline-dashed outline-2 outline-secondary md:text-left"
+        >
           {videoSummary.summary}
           <RegenerateSummary videoId={videoSummary.videoId} />
         </div>
       </div>
 
-      <div>
-        {/* REVIEW: 만약summary가 없다면? */}
+      <div className="flex w-full flex-col gap-10">
         <FactCheck summary={videoSummary.summary!} />
       </div>
     </section>

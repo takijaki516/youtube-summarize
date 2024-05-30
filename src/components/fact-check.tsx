@@ -6,9 +6,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Form } from "react-hook-form";
 import { useState } from "react";
 
+import { Form } from "./ui/form";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { FactCheckerResponse, checkFacts } from "@/app/actions";
@@ -29,51 +29,64 @@ export const FactCheck = ({ summary }: { summary: string }) => {
     },
   });
 
+  const onSubmit = async (data: z.infer<typeof FactCheckFormSchema>) => {
+    await checkFacts(data).then((value: FactCheckerResponse) => {
+      if (!value) {
+        return toast.error("An error occurred while checking the facts");
+      }
+
+      setIsAccurate(value.isAccurate);
+      setSource(value.source);
+      setOutput(value.text);
+      return;
+    });
+  };
+
   return (
     <Form {...factCheckForm}>
       <form
-        className="flex flex-col"
-        onSubmit={factCheckForm.handleSubmit(async (data) => {
-          await checkFacts(data).then((value: FactCheckerResponse) => {
-            if (!value) {
-              return toast.error("An error occurred while checking the facts");
-            }
-
-            setIsAccurate(value.isAccurate);
-            setSource(value.source);
-            setOutput(value.text);
-            return;
-          });
-        })}
+        className="flex flex-col w-full gap-5 rounded-xl border-primary
+        p-5 outline-dashed outline-2 outline-primary"
+        onSubmit={factCheckForm.handleSubmit(onSubmit)}
       >
-        <p>
+        <div className="text-justify text-xs md:text-left">
           {output ? (
-            <div>
-              <Badge>
+            <div className="flex flex-col gap-2">
+              <Badge className="max-w-fit">
                 {isAccurate === "true" ? (
                   <>
-                    <ShieldCheck />
+                    <ShieldCheck className="mr-2 size-4" />
                     Accurate
                   </>
                 ) : (
                   <>
-                    <ShieldX />
+                    <ShieldX className="mr-2 size-4" />
                     InAccurate
                   </>
                 )}
               </Badge>
-              <Link href={source!}>{source?.slice(0, 40).concat("...")}</Link>
+              <div className="mt-4">{output}</div>
+              <Link
+                className="mt-2 text-xs text-muted-foreground"
+                href={source!}
+              >
+                {source?.slice(0, 40).concat("...")}
+              </Link>
             </div>
           ) : (
-            `fact check the summary`
+            `search to check if the summary is accurate or not.`
           )}
-        </p>
+        </div>
 
         {!output && (
-          <Button type="submit" disabled={factCheckForm.formState.isSubmitting}>
+          <Button
+            type="submit"
+            className="group w-full"
+            disabled={factCheckForm.formState.isSubmitting}
+          >
             {factCheckForm.formState.isSubmitting ? (
               <>
-                <Loader />
+                <Loader className="size-4 animate-spin duration-1000" />
               </>
             ) : (
               <>Check for Truth</>
