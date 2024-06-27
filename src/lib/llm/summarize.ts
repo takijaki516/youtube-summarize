@@ -9,7 +9,7 @@ export const summarizeTranscriptWithGpt = async (
   const splitter = new TokenTextSplitter({
     encodingName: "gpt2",
     chunkSize: model === "gpt-4o" ? 12800 : 16000,
-    chunkOverlap: 0,
+    chunkOverlap: 20,
   });
 
   const gpt = new ChatOpenAI({
@@ -24,7 +24,7 @@ export const summarizeTranscriptWithGpt = async (
       const prompt = ChatPromptTemplate.fromMessages([
         [
           "system",
-          "You are a highly skilled AI trained in language compression. I would like you to read the ",
+          "You are a highly skilled AI trained in language compression. Compress the following text to the most efficient form possible. Be precise!",
         ],
         ["human", output.pageContent],
       ]);
