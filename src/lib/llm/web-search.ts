@@ -18,19 +18,10 @@ import { AgentFinish, AgentStep } from "@langchain/core/agents";
 import { FunctionsAgentAction } from "langchain/agents/openai/output_parser";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
-export const searchResponseSchema = z.object({
-  isAccurate: z
-    .enum(["true", "false"])
-    .describe("whether the video is accurate or not."),
-  source: z.string().url().describe("the source of the video on web"),
-  text: z.string().describe("extra information about the video"),
-});
-
 const llm = new ChatOpenAI({
   model: "gpt-3.5-turbo",
 });
 
-// REVIEW:
 const searchTool = new DynamicTool({
   name: "web-search", // used by llm to determine when to call this function
   description: "Tool for getting the latest information from the web", // used by llm to determine when to call this function
@@ -43,6 +34,14 @@ const searchTool = new DynamicTool({
     const docs = await retriever.invoke(searchQuery, runManager?.getChild());
     return docs.map((doc) => doc.pageContent).join("\n-----\n");
   },
+});
+
+export const searchResponseSchema = z.object({
+  isAccurate: z
+    .enum(["true", "false"])
+    .describe("whether the video is accurate or not."),
+  source: z.string().url().describe("the source of the video on web"),
+  text: z.string().describe("extra information about the video"),
 });
 
 const responseOpenAIFunction = {
@@ -59,6 +58,10 @@ const prompt = ChatPromptTemplate.fromMessages([
   ["human", "{input}"],
   new MessagesPlaceholder("agent_scratchpad"),
 ]);
+
+const llmWithTools = llm.bind({
+  functions: [convertToOpenAIFunction(searchTool), responseOpenAIFunction],
+});
 
 const structuredOutputParse = (
   message: AIMessage
@@ -97,7 +100,6 @@ const structuredOutputParse = (
 };
 
 const formatAgentSteps = (steps: AgentStep[]): BaseMessage[] => {
-  // REVIEW:
   return steps.flatMap(({ action, observation }) => {
     if ("messageLog" in action && action.messageLog !== undefined) {
       const log = action.messageLog as BaseMessage[];
@@ -107,11 +109,6 @@ const formatAgentSteps = (steps: AgentStep[]): BaseMessage[] => {
     }
   });
 };
-
-const llmWithTools = llm.bind({
-  // REVIEW: convertToOpenAIFunction
-  functions: [convertToOpenAIFunction(searchTool), responseOpenAIFunction],
-});
 
 const runnableAgent = RunnableSequence.from<{
   input: string;
@@ -126,6 +123,8 @@ const runnableAgent = RunnableSequence.from<{
   structuredOutputParse,
 ]);
 
+// NOTE: https://js.langchain.com/v0.1/docs/expression_language/cookbook/agents/
+// NOTE: https://js.langchain.com/v0.1/docs/modules/agents/agent_types/openai_tools_agent/
 export const searchUsingTavilly = async (summary: string) => {
   const executor = AgentExecutor.fromAgentAndTools({
     agent: runnableAgent,
@@ -135,11 +134,6 @@ export const searchUsingTavilly = async (summary: string) => {
   const result = await executor.invoke({
     input: summary,
   });
-
-  console.log(
-    "🚀 ~ file: web-search.ts:138 ~ searchUsingTavilly ~ result:",
-    result
-  );
 
   return JSON.stringify(result);
 };

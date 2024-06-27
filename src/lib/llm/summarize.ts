@@ -29,7 +29,7 @@ export const summarizeTranscriptWithGpt = async (
         ["human", output.pageContent],
       ]);
 
-      const chain = prompt.pipe(gpt); // REVIEW:
+      const chain = prompt.pipe(gpt); // REVIEW: pipe
       const res = await chain.invoke({});
 
       if (!res) {

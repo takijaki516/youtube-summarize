@@ -33,47 +33,10 @@ export const handleInitialFormSubmit = async (
       },
     });
 
-    // NOTE: if video already exists re summarize it
+    // NOTE: if video already exists
     if (existingVideo) {
-      const exisitingSummary = await prismaDB.videos.findUnique({
-        where: {
-          videoId: videoId,
-        },
-      });
-
-      if (exisitingSummary) {
-        return exisitingSummary.videoId;
-      }
-
-      let summary: MessageContent | null = null;
-
-      // NOTE: openai
-      if (formData.model == "gpt-3.5-turbo" || formData.model == "gpt-4o") {
-        summary = await summarizeTranscriptWithGpt(
-          existingVideo.transcript,
-          formData.model
-        );
-      } else {
-        // TODO: Implement other models
-      }
-
-      if (!summary) {
-        throw new Error("Could not summarize the transcript");
-      }
-
-      const updatedVideo = await prismaDB.videos.update({
-        where: {
-          videoId: videoId,
-        },
-        data: {
-          summary: summary as string,
-        },
-      });
-
-      return updatedVideo.id;
+      return existingVideo.videoId;
     }
-
-    //
 
     const transcript = await transcriptVideo(formData.link);
 
@@ -90,6 +53,7 @@ export const handleInitialFormSubmit = async (
     });
 
     let summary: MessageContent | null = null;
+
     // NOTE: openai models
     if (formData.model == "gpt-3.5-turbo" || formData.model == "gpt-4o") {
       summary = await summarizeTranscriptWithGpt(transcript, formData.model);
@@ -112,10 +76,8 @@ export const handleInitialFormSubmit = async (
 
     return videoId;
   } catch (e) {
-    console.error(e);
     return null;
   } finally {
-    console.log("generated summary");
     revalidatePath("/");
     revalidatePath("/summaries");
   }
@@ -124,8 +86,6 @@ export const handleInitialFormSubmit = async (
 export const handleRegenerateSummary = async (
   formData: z.infer<typeof RegenerateSummaryFormSchema>
 ) => {
-  const start = Date.now();
-
   try {
     const video = await prismaDB.videos.findUnique({
       where: {
@@ -138,6 +98,7 @@ export const handleRegenerateSummary = async (
     }
 
     let summary: MessageContent | null = null;
+    
     if (formData.model == "gpt-3.5-turbo" || formData.model == "gpt-4o") {
       summary = await summarizeTranscriptWithGpt(
         video.transcript,
@@ -165,11 +126,11 @@ export const handleRegenerateSummary = async (
     console.error(error);
     return false;
   } finally {
-    console.log();
     revalidatePath(`/${formData.videoId}`);
   }
 };
 
+// REVIEW: 
 export const checkFacts = async (
   formData: z.infer<typeof FactCheckFormSchema>
 ) => {

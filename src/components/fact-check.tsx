@@ -45,11 +45,10 @@ export const FactCheck = ({ summary }: { summary: string }) => {
   return (
     <Form {...factCheckForm}>
       <form
-        className="flex flex-col w-full gap-5 rounded-xl border
-        p-5 outline-dashed outline-2 outline-muted"
+        className="flex flex-col w-full gap-5 rounded-md p-5 outline-dashed outline-2 outline-muted"
         onSubmit={factCheckForm.handleSubmit(onSubmit)}
       >
-        <div className="text-justify text-xs md:text-left">
+        <div className="text-justify">
           {output ? (
             <div className="flex flex-col gap-2">
               <Badge className="max-w-fit">
@@ -81,15 +80,13 @@ export const FactCheck = ({ summary }: { summary: string }) => {
         {!output && (
           <Button
             type="submit"
-            className="group w-full"
+            className="w-full"
             disabled={factCheckForm.formState.isSubmitting}
           >
             {factCheckForm.formState.isSubmitting ? (
-              <>
-                <Loader className="size-4 animate-spin duration-1000" />
-              </>
+              <Loader className="size-4 animate-spin" />
             ) : (
-              <>Check for Truth</>
+              <div>Check for Truth</div>
             )}
           </Button>
         )}

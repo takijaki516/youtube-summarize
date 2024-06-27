@@ -39,7 +39,7 @@ export const SummarizeForm = () => {
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     await handleInitialFormSubmit(data).then((value: string | null) => {
       if (value) {
-        toast.info("Redirecting...");
+        toast.success("generated summary successfully, redirecting...");
         return router.push(`/${value}`);
       }
 

@@ -23,7 +23,7 @@ const SummariesPage = async () => {
         return (
           videoInfo && (
             <Link
-              href={`/${video.id}`}
+              href={`/${video.videoId}`}
               className="w-full rounded-xl bg-secondary p-2 transition-all
               duration-200 hover:-translate-y-1 "
             >
