@@ -45,8 +45,8 @@ export const FactCheck = ({ summary }: { summary: string }) => {
   return (
     <Form {...factCheckForm}>
       <form
-        className="flex flex-col w-full gap-5 rounded-xl border-primary
-        p-5 outline-dashed outline-2 outline-primary"
+        className="flex flex-col w-full gap-5 rounded-xl border
+        p-5 outline-dashed outline-2 outline-muted"
         onSubmit={factCheckForm.handleSubmit(onSubmit)}
       >
         <div className="text-justify text-xs md:text-left">

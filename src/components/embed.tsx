@@ -6,6 +6,7 @@ import { AspectRatio } from "./ui/aspect-ratio";
 
 export const Embed = ({ thumbnail }: { thumbnail: string }) => {
   return (
+    // REVIEW: css
     <div className="w-full">
       <AspectRatio ratio={16 / 9}>
         <Image

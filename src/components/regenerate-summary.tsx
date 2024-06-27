@@ -1,6 +1,6 @@
 "use client";
 
-import { Bolt, Loader, Settings2 } from "lucide-react";
+import { Bot, Loader } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -48,7 +48,10 @@ export const RegenerateSummary = ({ videoId }: { videoId: string }) => {
 
   return (
     <Form {...regenerateForm}>
-      <form className="flex" onSubmit={regenerateForm.handleSubmit(onSubmit)}>
+      <form
+        className="flex gap-2"
+        onSubmit={regenerateForm.handleSubmit(onSubmit)}
+      >
         <FormField
           disabled={regenerateForm.formState.isSubmitting}
           control={regenerateForm.control}
@@ -58,21 +61,27 @@ export const RegenerateSummary = ({ videoId }: { videoId: string }) => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button>
-                    <Settings2 />
+                    <Bot />
                   </Button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent>
+                <DropdownMenuContent align="start">
                   <DropdownMenuLabel>Choose your AI model</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuRadioGroup
                     value={field.value}
                     onValueChange={field.onChange}
                   >
-                    <DropdownMenuRadioItem value="gpt-3.5-turbo">
+                    <DropdownMenuRadioItem
+                      value="gpt-3.5-turbo"
+                      className="cursor-pointer"
+                    >
                       GPT-3.5 Turbo
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="gpt-4o">
+                    <DropdownMenuRadioItem
+                      value="gpt-4o"
+                      className="cursor-pointer"
+                    >
                       GPT-4o
                     </DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>

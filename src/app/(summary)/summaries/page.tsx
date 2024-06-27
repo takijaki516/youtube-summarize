@@ -33,6 +33,10 @@ const SummariesPage = async () => {
       <div className="m-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 ">
         {summaries.map(async (summary) => {
           const videoInfo = await ytdl.getInfo(summary.videoId);
+          console.log(
+            "🚀 ~ file: page.tsx:36 ~ {summaries.map ~ videoInfo:",
+            videoInfo.videoDetails.title
+          );
 
           return (
             videoInfo && (
