@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ListVideo, Loader, Settings2 } from "lucide-react";
+import { ListVideo, Loader, Bot } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
@@ -23,7 +23,7 @@ import { handleInitialFormSubmit } from "@/app/actions";
 
 export const formSchema = z.object({
   link: z.string().describe("the youtube video you would like to summarize"),
-  model: z.enum(["gpt-3.5-turbo", "gpt-4o", "llama3"]),
+  model: z.enum(["gpt-3.5-turbo", "gpt-4o"]),
 });
 
 export const SummarizeForm = () => {
@@ -40,9 +40,9 @@ export const SummarizeForm = () => {
     await handleInitialFormSubmit(data).then((value: string | null) => {
       if (value) {
         toast.info("Redirecting...");
-
         return router.push(`/${value}`);
       }
+
       toast.error("error generating summary, please try again later.");
       return router.refresh(); // REVIEW: does this revalidate cache?
     });
@@ -54,7 +54,7 @@ export const SummarizeForm = () => {
         className="flex flex-col w-full items-start gap-2 md:flex-row"
         onSubmit={summaryForm.handleSubmit(onSubmit)}
       >
-        <div className="flex w-full gap-2 md:max-w-2xl">
+        <div className="flex w-full gap-2">
           <FormField
             disabled={summaryForm.formState.isSubmitting}
             control={summaryForm.control}
@@ -85,11 +85,11 @@ export const SummarizeForm = () => {
                       variant={"secondary"}
                       size={"icon"}
                     >
-                      <Settings2 className="size-4" />
+                      <Bot className="h-6 w-6" />
                     </Button>
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent className="w-full">
+                  <DropdownMenuContent align="start">
                     <DropdownMenuLabel>choose a model</DropdownMenuLabel>
                     <DropdownMenuSeparator />
 
@@ -103,9 +103,6 @@ export const SummarizeForm = () => {
                       <DropdownMenuRadioItem value="gpt-4o">
                         gpt-4o
                       </DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="llama3">
-                        llama3
-                      </DropdownMenuRadioItem>
                     </DropdownMenuRadioGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -116,13 +113,12 @@ export const SummarizeForm = () => {
 
         <Button
           disabled={summaryForm.formState.isSubmitting}
+          // REVIEW:
           className="group w-full md:max-w-fit"
           type="submit"
         >
           {summaryForm.formState.isSubmitting ? (
-            <>
-              <Loader className="size-4 animate-spin duration-1000" />
-            </>
+            <Loader className="size-4 animate-spin" />
           ) : (
             <>
               Summarize

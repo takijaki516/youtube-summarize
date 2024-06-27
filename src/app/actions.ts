@@ -23,8 +23,6 @@ export type FactCheckerResponse = {
 export const handleInitialFormSubmit = async (
   formData: z.infer<typeof formSchema>
 ) => {
-  const start = Date.now();
-
   try {
     const videoInfo = await ytdl.getInfo(formData.link);
     const videoId = videoInfo.videoDetails.videoId;
@@ -35,19 +33,21 @@ export const handleInitialFormSubmit = async (
       },
     });
 
+    // NOTE: if video already exists re summarize it
     if (existingVideo) {
-      const exisitingSummary = await prismaDB.videos.findMany({
+      const exisitingSummary = await prismaDB.videos.findUnique({
         where: {
           videoId: videoId,
         },
-        take: 1,
       });
 
       if (exisitingSummary) {
-        return exisitingSummary[0].videoId;
+        return exisitingSummary.videoId;
       }
 
       let summary: MessageContent | null = null;
+
+      // NOTE: openai
       if (formData.model == "gpt-3.5-turbo" || formData.model == "gpt-4o") {
         summary = await summarizeTranscriptWithGpt(
           existingVideo.transcript,
@@ -73,6 +73,8 @@ export const handleInitialFormSubmit = async (
       return updatedVideo.id;
     }
 
+    //
+
     const transcript = await transcriptVideo(formData.link);
 
     if (!transcript) {
@@ -88,6 +90,7 @@ export const handleInitialFormSubmit = async (
     });
 
     let summary: MessageContent | null = null;
+    // NOTE: openai models
     if (formData.model == "gpt-3.5-turbo" || formData.model == "gpt-4o") {
       summary = await summarizeTranscriptWithGpt(transcript, formData.model);
     } else {
