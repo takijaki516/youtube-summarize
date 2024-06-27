@@ -10,7 +10,7 @@ interface IVideoWidgetProps {
 
 export const VideoWidget = ({ thumbnail, title }: IVideoWidgetProps) => {
   return (
-    <div className="w-full rounded-lg md:w-[300px]">
+    <div className="w-full rounded-lg">
       <AspectRatio
         suppressHydrationWarning
         ratio={16 / 9}
@@ -27,7 +27,7 @@ export const VideoWidget = ({ thumbnail, title }: IVideoWidgetProps) => {
           className="absolute bottom-0 w-full rounded-b-md bg-background/50
         px-4 py-3 backdrop-blur-xl"
         >
-          <p className="text-xs">{title}</p>
+          <p className="text-xs md:text-base">{title}</p>
         </div>
       </AspectRatio>
     </div>

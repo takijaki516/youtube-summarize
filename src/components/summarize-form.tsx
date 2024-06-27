@@ -51,7 +51,7 @@ export const SummarizeForm = () => {
   return (
     <Form {...summaryForm}>
       <form
-        className="flex flex-col w-full items-start gap-2 md:flex-row"
+        className="flex flex-col w-full items-start gap-4"
         onSubmit={summaryForm.handleSubmit(onSubmit)}
       >
         <div className="flex w-full gap-2">
@@ -114,7 +114,7 @@ export const SummarizeForm = () => {
         <Button
           disabled={summaryForm.formState.isSubmitting}
           // REVIEW:
-          className="group w-full md:max-w-fit"
+          className="group w-full"
           type="submit"
         >
           {summaryForm.formState.isSubmitting ? (

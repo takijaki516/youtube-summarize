@@ -25,7 +25,7 @@ const SummariesPage = async () => {
   }
 
   return (
-    <div className="mt-16 flex flex-col items-center">
+    <div className="mt-10 flex flex-col items-center  md:mt-28">
       <h1 className="text-4xl font-extrabold leading-tight tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-800">
         Summaries
       </h1>
@@ -36,7 +36,11 @@ const SummariesPage = async () => {
 
           return (
             videoInfo && (
-              <Link href={`/${summary.videoId}`}>
+              <Link
+                href={`/${summary.videoId}`}
+                className="transition-all
+              duration-200 hover:-translate-y-1"
+              >
                 <Embed
                   thumbnail={videoInfo.videoDetails.thumbnails.reverse()[0].url}
                 />
