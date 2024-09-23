@@ -1,8 +1,8 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { env } from "@/lib/env.mjs";
+import { env } from "../env";
 
-if (env.DATABASE_URL) {
+if (!env.DATABASE_URL) {
   throw new Error("POSTGRES_URL environment variable is not set");
 }
 
