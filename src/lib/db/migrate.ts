@@ -1,12 +1,24 @@
+import "dotenv/config";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config();
+export const client = postgres(process.env.DATABASE_URL!);
+export const db = drizzle(client);
 
-if (!process.env.POSTGRES_URL) {
-  throw new Error("POSTGRES_URL environment variable is not set");
+async function main() {
+  console.log("STARTING MIGRATIONS!");
+
+  await migrate(db, {
+    migrationsFolder: path.join(process.cwd(), "src/lib/db/migrations"),
+  });
+
+  console.log("MIGRATIONS COMPLETED!");
+
+  await client.end();
+
+  console.log("CONNECTION CLOSED!");
 }
 
-export const client = postgres(process.env.POSTGRES_URL);
-export const db = drizzle(client);
+main();
