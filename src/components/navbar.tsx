@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { User } from "lucide-react";
 
 import { ModeToggle } from "./theme-toggle";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+
 import { auth } from "@/auth";
 import { GoogleLoginButton } from "./login-button";
+import { UserDialog } from "./user-dialog";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "./ui/button";
 
 export async function Navbar() {
   const session = await auth();
@@ -19,13 +23,16 @@ export async function Navbar() {
 
       <nav className="flex items-center gap-4 sm:gap-6">
         {session ? (
-          <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-        ) : (
-          <GoogleLoginButton />
-        )}
+          <Link
+            href="/user"
+            className={buttonVariants({ variant: "outline", size: "icon" })}
+          >
+            <User className="h-[1.2rem] w-[1.2rem]" />
+            <span className="sr-only">user page</span>
+          </Link>
+        ) : null}
+
+        {session ? <UserDialog /> : <GoogleLoginButton />}
 
         <ModeToggle />
       </nav>

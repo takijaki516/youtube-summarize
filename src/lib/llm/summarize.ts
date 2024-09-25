@@ -4,7 +4,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 
 export const summarizeTranscriptWithGpt = async (
   transcript: string,
-  model: "gpt-3.5-turbo" | "gpt-4o"
+  model: "gpt-3.5-turbo" | "gpt-4o",
 ) => {
   const splitter = new TokenTextSplitter({
     encodingName: "gpt2",
