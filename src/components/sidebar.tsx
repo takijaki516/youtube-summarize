@@ -4,7 +4,7 @@ import { ModeToggle } from "./theme-toggle";
 
 export function Sidebar() {
   return (
-    <div className="flex h-screen w-16 flex-col border-r bg-background">
+    <div className="flex h-full w-16 flex-col border-r bg-background">
       <div className="flex flex-grow flex-col justify-center space-y-4">
         <Button variant="ghost" size="icon" className="rounded-full">
           <Plus className="h-6 w-6" />

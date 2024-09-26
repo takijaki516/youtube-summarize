@@ -2,7 +2,11 @@ import fs from "node:fs";
 // import { chromium } from "playwright";
 import { YoutubeTranscript } from "youtube-transcript";
 
-import { TranscriptSegment } from "../types";
+import { TranscriptSegment } from "../../types/types";
+import { similarText } from "./embedding";
+import { dbDrizzle } from "../db/drizzle";
+import { videos } from "../db/schema/video";
+import { eq } from "drizzle-orm";
 
 export async function getTranscript(url: string): Promise<TranscriptSegment[]> {
   const transcripts = await YoutubeTranscript.fetchTranscript(url);
@@ -31,55 +35,74 @@ export function mergeTranscript(transcripts: TranscriptSegment[]): string {
   return mergedTranscript;
 }
 
-// REVIEW: about this regex
-// export async function generateMarkdown(transcript: string, url: string) {
-//   const placeholders = transcript.match(/<.+?>/g);
+export async function generateMarkdown(
+  transcript: string,
+  url: string,
+  videoId: number,
+) {
+  const placeholders = transcript.match(/<.+?>/g);
 
-//   if (!placeholders) {
-//     return;
-//   }
+  if (!placeholders) {
+    return;
+  }
 
-//   for (const placeholder of placeholders) {
-//     const resplacementText = await processPlaceholder(placeholder, url);
-//     transcript = transcript.replace(placeholder, resplacementText);
-//   }
+  for (const placeholder of placeholders) {
+    const resplacementText = await processPlaceholder(
+      placeholder,
+      url,
+      videoId,
+    );
 
-//   fs.writeFileSync("summarized_transcript.md", transcript);
-// }
+    transcript = transcript.replace(placeholder, resplacementText);
+  }
 
-// async function processPlaceholder(placeholder: string, url: string) {
-//   let deteleTimeFromURL = url.replace(/&t=\d+s/, "");
+  await dbDrizzle
+    .update(videos)
+    .set({
+      summary: transcript,
+    })
+    .where(eq(videos.id, videoId));
 
-//   if (placeholder.startsWith("<PICTURE:")) {
-//     const description = placeholder.slice(9, -1);
-//     const result = await similarText(description);
+  fs.writeFileSync("summarized_transcript.md", transcript);
+}
 
-//     const timestamp = Math.floor(result.start);
-//     const formattedTime = secondsToHMS(timestamp);
+async function processPlaceholder(
+  placeholder: string,
+  url: string,
+  videoId: number,
+) {
+  let deteleTimeFromURL = url.replace(/&t=\d+s/, "");
 
-//     const imageFileName = `frames/screenshot-${timestamp}.jpg`;
-//     const hyperlink = `${deteleTimeFromURL}&t=${timestamp}s`;
-//     // await takeYouTubeVideoScreenshot(
-//     //   deteleTimeFromURL,
-//     //   timestamp,
-//     //   imageFileName,
-//     // );
+  if (placeholder.startsWith("<PICTURE:")) {
+    const description = placeholder.slice(9, -1);
+    const result = await similarText(description, videoId);
 
-//     return `<img src="${imageFileName}" alt="${description}" width="450" /> <br /> [Jump to this part of the video: ${formattedTime}](${hyperlink})`;
-//   } else if (placeholder.startsWith("<HYPERLINK:")) {
-//     const text = placeholder.slice(11, -1);
-//     const result = await similarText(text);
+    const timestamp = result.start;
+    const formattedTime = secondsToHMS(timestamp);
 
-//     const timestamp = Math.floor(result.start);
-//     const formattedTime = secondsToHMS(timestamp);
+    const imageFileName = `frames/screenshot-${timestamp}.jpg`;
+    const hyperlink = `${deteleTimeFromURL}&t=${timestamp}s`;
+    // await takeYouTubeVideoScreenshot(
+    //   deteleTimeFromURL,
+    //   timestamp,
+    //   imageFileName,
+    // );
 
-//     const hyperlink = `${deteleTimeFromURL}&t=${timestamp}s`;
+    return `<img src="${imageFileName}" alt="${description}" width="450" /> <br /> [Jump to this part of the video: ${formattedTime}](${hyperlink})`;
+  } else if (placeholder.startsWith("<HYPERLINK:")) {
+    const text = placeholder.slice(11, -1);
+    const result = await similarText(text, videoId);
 
-//     return `[Jump to this part of the video: ${formattedTime}](${hyperlink})`;
-//   } else {
-//     return placeholder;
-//   }
-// }
+    const timestamp = result.start;
+    const formattedTime = secondsToHMS(timestamp);
+
+    const hyperlink = `${deteleTimeFromURL}&t=${timestamp}s`;
+
+    return `[Jump to this part of the video: ${formattedTime}](${hyperlink})`;
+  } else {
+    return placeholder;
+  }
+}
 
 function secondsToHMS(time: number): string {
   const hours = Math.floor(time / 3600)
@@ -91,6 +114,7 @@ function secondsToHMS(time: number): string {
   const seconds = Math.floor(time % 60)
     .toString()
     .padStart(2, "0");
+
   return `${hours}:${minutes}:${seconds}`;
 }
 

@@ -9,7 +9,7 @@ export default function UserLayout({
 }) {
   return (
     <html suppressHydrationWarning lang="en">
-      <body className="flex min-h-screen bg-blue-300">
+      <body className="flex h-dvh overflow-hidden bg-blue-300">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

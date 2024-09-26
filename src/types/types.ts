@@ -23,3 +23,9 @@ export type SimilarSearchResult = {
   lang: string;
   cosine_similarity: number;
 };
+
+declare global {
+  interface Window {
+    onYouTubeIframeAPIReady: () => void;
+  }
+}

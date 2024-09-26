@@ -57,7 +57,7 @@ export default function UserHomepage() {
           variant={"ghost"}
           onClick={generateSummary}
         >
-          {isLoading ? <RotateCw /> : <Send />}
+          {isLoading ? <RotateCw className="animate-spin" /> : <Send />}
         </Button>
       </div>
     </main>

@@ -2,9 +2,14 @@ import ytdl from "ytdl-core";
 
 import { auth } from "@/auth";
 import { embedTranscript } from "@/lib/llm/embedding";
-import { getTranscript } from "@/lib/llm/transcript";
+import {
+  generateMarkdown,
+  getTranscript,
+  mergeTranscript,
+} from "@/lib/llm/transcript";
 import { dbDrizzle } from "@/lib/db/drizzle";
 import { videos } from "@/lib/db/schema/video";
+import { generateSummary } from "@/lib/llm/summarize";
 
 export const POST = auth(async function POST(req) {
   if (!req.auth) {
@@ -19,6 +24,9 @@ export const POST = auth(async function POST(req) {
 
   const transcripts = await getTranscript(url);
 
+  const mergedTranscript = mergeTranscript(transcripts);
+  const summaryText = await generateSummary(mergedTranscript);
+
   const insertedVideo = await dbDrizzle
     .insert(videos)
     .values({
@@ -31,6 +39,7 @@ export const POST = auth(async function POST(req) {
     });
 
   await embedTranscript(transcripts, insertedVideo[0].id, userId);
+  await generateMarkdown(summaryText, url, insertedVideo[0].id);
 
   return Response.json(
     { message: "Embedded Transcript", vId: insertedVideo[0].id },

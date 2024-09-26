@@ -6,6 +6,7 @@ export const videos = pgTable("video", {
   id: serial("id").primaryKey(),
   title: text("title"),
   url: text("url"),
+  summary: text("summary"),
   userId: text("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),

@@ -1,13 +1,10 @@
-import OpenAI from "openai";
+import { cosineDistance, eq, sql } from "drizzle-orm";
+import pgvector from "pgvector";
 
-import { env } from "../env";
-import { TranscriptSegment } from "../types";
+import { SimilarSearchResult, TranscriptSegment } from "../../types/types";
 import { dbDrizzle } from "../db/drizzle";
 import { embeddings } from "../db/schema/embedding";
-
-const openai = new OpenAI({
-  apiKey: env.OPENAI_API_KEY,
-});
+import { openai } from "./openai";
 
 // Function to get embedding from OpenAI
 async function getEmbedding(text: string): Promise<number[]> {
@@ -33,6 +30,7 @@ async function storeEmbedding(
     lang: language,
     userId: userId,
     videoId: videoId,
+    start: Math.ceil(segment.offset),
   });
 }
 
@@ -45,4 +43,25 @@ export async function embedTranscript(
     const embedding = await getEmbedding(segment.text);
     await storeEmbedding(segment, embedding, videoId, userId);
   }
+}
+
+// Function to find similar text using cosine similarity
+export async function similarText(
+  text: string,
+  videoId: number,
+  limit: number = 1,
+): Promise<SimilarSearchResult> {
+  const queryEmbedding = await getEmbedding(text);
+
+  const pgQueryEmbedding = pgvector.toSql(queryEmbedding);
+
+  const result = await dbDrizzle.execute(sql`
+    SELECT text, start, lang, 1 - (embedding <=> ${pgQueryEmbedding}) AS cosine_similarity
+    FROM ${embeddings}
+    WHERE ${embeddings.videoId} = ${videoId}
+    ORDER BY cosine_similarity DESC
+    LIMIT ${limit}
+  `);
+
+  return result[0] as SimilarSearchResult;
 }
