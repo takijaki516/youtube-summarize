@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 
 import { useYouTubeStore } from "@/lib/store/use-youtube-store";
 import { Button } from "./ui/button";
@@ -17,6 +18,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     <div className="prose max-w-none overflow-y-auto p-10 dark:prose-invert">
       <ReactMarkdown
         // remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
         components={{
           // code({ node, inline, className, children, ...props }) {
           //   const match = /language-(\w+)/.exec(className || "");
@@ -50,6 +52,16 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
               </Button>
             );
           },
+
+          br({ children }) {
+            return <br />;
+          },
+
+          img: (props) => {
+            return <span>F</span>;
+          },
+          hr: () => <hr className="my-4 border-t border-gray-300" />,
+          p: ({ node, ...props }) => <p className="mb-4" {...props} />,
         }}
       >
         {content}
