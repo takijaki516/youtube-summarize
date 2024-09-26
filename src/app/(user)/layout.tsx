@@ -1,5 +1,4 @@
-import "../../globals.css";
-
+import "@/app/styles/globals.css";
 import { Sidebar } from "@/components/sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 

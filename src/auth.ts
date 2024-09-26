@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 
 import { authConfig } from "./auth.config";
-import { db } from "./lib/db/drizzle";
+import { dbDrizzle } from "./lib/db/drizzle";
 import {
   accounts,
   sessions,
@@ -17,7 +17,7 @@ export const {
   signOut,
 } = NextAuth({
   secret: process.env.AUTH_SECRET,
-  adapter: DrizzleAdapter(db, {
+  adapter: DrizzleAdapter(dbDrizzle, {
     usersTable: users,
     accountsTable: accounts,
     sessionsTable: sessions,

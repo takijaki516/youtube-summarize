@@ -24,7 +24,7 @@ export async function Navbar() {
       <nav className="flex items-center gap-4 sm:gap-6">
         {session ? (
           <Link
-            href="/user"
+            href="/u"
             className={buttonVariants({ variant: "outline", size: "icon" })}
           >
             <User className="h-[1.2rem] w-[1.2rem]" />

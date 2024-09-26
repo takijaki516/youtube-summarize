@@ -1,9 +1,34 @@
-import { Send } from "lucide-react";
+"use client";
+
+import * as React from "react";
+import { Send, RotateCw } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export default function UserHomepage() {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [url, setUrl] = React.useState("");
+
+  const router = useRouter();
+
+  const generateSummary = async () => {
+    setIsLoading(true);
+
+    const res = await fetch("/api/transcript", {
+      method: "POST",
+      body: JSON.stringify({
+        url,
+      }),
+    });
+
+    const vId = (await res.json()).vId;
+
+    router.push(`/v/${vId}`);
+    setIsLoading(false);
+  };
+
   return (
     <main className="flex flex-1 flex-col items-center justify-center bg-background px-4">
       <div className="relative max-w-md text-4xl md:text-5xl lg:text-6xl">
@@ -17,14 +42,22 @@ export default function UserHomepage() {
       </h2>
 
       <div className="relative w-full max-w-md">
-        <Input type="" id="url" placeholder="youtube url" className="w-full" />
+        <Input
+          type=""
+          id="url"
+          placeholder="youtube url"
+          className="w-full"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+        />
 
         <Button
           className="absolute right-0 top-0 hover:bg-primary hover:text-primary-foreground"
           size="icon"
           variant={"ghost"}
+          onClick={generateSummary}
         >
-          <Send />
+          {isLoading ? <RotateCw /> : <Send />}
         </Button>
       </div>
     </main>
