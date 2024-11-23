@@ -1,6 +1,5 @@
 "use client";
 
-import { Zap, BookOpen, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { Input } from "@/components/ui/input";
 
 export default function WelcomePage() {
   return (
-    <main className="flex flex-col">
+    <main className="flex flex-col bg-background">
       <section className="w-full pt-28">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center space-y-10 text-center">
@@ -23,12 +22,22 @@ export default function WelcomePage() {
               </span>
             </motion.h1>
 
-            <p className="mx-auto max-w-[700px] text-xl text-gray-700 md:text-2xl">
+            <motion.p
+              className="max-w-[700px] text-xl text-foreground md:text-2xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+            >
               Get concise summaries of any YouTube video using our advanced
               AI-powered transcript summarizer.
-            </p>
+            </motion.p>
 
-            <div className="w-full max-w-md space-y-4">
+            <motion.div
+              className="w-full max-w-md space-y-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
+            >
               <form className="flex flex-col space-y-4 sm:flex-row sm:space-x-2 sm:space-y-0">
                 <Input
                   className="flex-1"
@@ -39,42 +48,7 @@ export default function WelcomePage() {
                   Summarize
                 </Button>
               </form>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="w-full bg-white/50 py-12 backdrop-blur-sm md:py-24 lg:py-32">
-        <div className="container px-4 md:px-6">
-          <h2 className="mb-12 text-center text-3xl font-bold tracking-tighter text-gray-900 sm:text-4xl md:text-5xl">
-            Key Features
-          </h2>
-          <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-3">
-            <div className="flex flex-col items-center text-center">
-              <Zap className="mb-4 h-12 w-12 text-yellow-500" />
-              <h3 className="text-lg font-bold text-gray-900">
-                Instant Summaries
-              </h3>
-              <p className="text-sm text-gray-600">
-                Get quick summaries of long videos in seconds.
-              </p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <BookOpen className="mb-4 h-12 w-12 text-green-500" />
-              <h3 className="text-lg font-bold text-gray-900">
-                Comprehensive Analysis
-              </h3>
-              <p className="text-sm text-gray-600">
-                AI-powered insights capture the essence of the content.
-              </p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <Share2 className="mb-4 h-12 w-12 text-blue-500" />
-              <h3 className="text-lg font-bold text-gray-900">Easy Sharing</h3>
-              <p className="text-sm text-gray-600">
-                Share summaries with colleagues or on social media.
-              </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>

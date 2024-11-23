@@ -13,7 +13,7 @@ export async function Navbar() {
   const session = await auth();
 
   return (
-    <header className="sticky top-0 flex h-16 items-center justify-between bg-background/40 px-4 backdrop-blur-lg lg:px-6">
+    <header className="container sticky top-0 flex h-16 items-center justify-between bg-background/40 px-4 backdrop-blur-lg lg:px-6">
       <Link
         className="flex items-center justify-center text-2xl font-bold text-foreground"
         href="/"

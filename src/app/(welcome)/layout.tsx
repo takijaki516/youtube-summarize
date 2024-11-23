@@ -30,7 +30,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Navbar />
-          <main className="flex-1">{children}</main>
+          <main className="container flex-1">{children}</main>
           <TailwindIndicator />
         </ThemeProvider>
       </body>

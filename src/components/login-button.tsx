@@ -32,7 +32,7 @@ export function GoogleLoginButton() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Sign In</Button>
+        <Button>Sign In</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -42,7 +42,6 @@ export function GoogleLoginButton() {
           </DialogDescription>
         </DialogHeader>
         <Button
-          variant="outline"
           className="w-full max-w-sm"
           disabled={isPending}
           onClick={handleClick}
