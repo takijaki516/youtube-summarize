@@ -28,10 +28,17 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
             const timestamp = hours * 3600 + minutes * 60 + seconds;
 
             return (
-              <Button onClick={() => setStartTime(timestamp)}>
+              <span
+                onClick={() => setStartTime(timestamp)}
+                className="underline underline-offset-2 opacity-80 transition-opacity duration-200 hover:opacity-100"
+              >
                 {children}
-              </Button>
+              </span>
             );
+          },
+
+          img({ src, alt }) {
+            return null;
           },
           br({ children }) {
             return <br />;

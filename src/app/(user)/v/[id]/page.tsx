@@ -14,21 +14,23 @@ export default async function VideoPage({
   const video = await dbDrizzle
     .select()
     .from(videosSchema)
-    .where(eq(videosSchema.id, +params.id))
+    .where(eq(videosSchema.id, Number(params.id)))
     .limit(1);
 
-  const VID = getYouTubeVideoId(video[0].url!);
+  if (!video[0]) {
+    return <div>Not found</div>;
+  }
 
   return (
-    <main className="flex flex-1 items-center bg-background">
+    <main className="flex flex-1 items-center bg-background pt-10">
       <ResizableView>
-        {!VID ? <div>Not found</div> : <YouTubePlayer videoId={VID} />}
-
-        {!video[0] ? (
-          <div>Not found</div>
+        {getYouTubeVideoId(video[0].url) ? (
+          <YouTubePlayer videoId={getYouTubeVideoId(video[0].url)!} />
         ) : (
-          <MarkdownRenderer content={video[0].summary!} />
+          <div>Not found</div>
         )}
+
+        <MarkdownRenderer content={video[0].summary} />
       </ResizableView>
     </main>
   );

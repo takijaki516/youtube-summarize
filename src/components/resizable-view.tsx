@@ -13,11 +13,11 @@ export function ResizableView({ children }: { children: React.ReactNode }) {
 
   return (
     <ResizablePanelGroup direction="horizontal" className="w-full">
-      <ResizablePanel>{children[0]}</ResizablePanel>
+      <ResizablePanel defaultSize={50}>{children[0]}</ResizablePanel>
 
       <ResizableHandle withHandle />
 
-      <ResizablePanel style={{ overflowY: "auto" }}>
+      <ResizablePanel defaultSize={50} style={{ overflowY: "auto" }}>
         {children[1]}
       </ResizablePanel>
     </ResizablePanelGroup>

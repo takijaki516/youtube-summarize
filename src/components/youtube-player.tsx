@@ -77,7 +77,7 @@ export const YouTubePlayer = React.memo(({ videoId }: { videoId: string }) => {
   }, [startTime]);
 
   return (
-    <div className="aspect-video pt-10">
+    <div className="aspect-video">
       <div id="youtube-player" className="h-full w-full"></div>
     </div>
   );

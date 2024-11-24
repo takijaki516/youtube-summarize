@@ -26,11 +26,13 @@ export const POST = auth(async function POST(req) {
   const mergedTranscript = mergeTranscript(transcripts);
   const summaryText = await generateSummary(mergedTranscript);
 
+  // TODO: change video ID to be uuid so we can use when storing embeddings which makes inserting video later with generated summary
   const insertedVideo = await dbDrizzle
     .insert(videosSchema)
     .values({
       url,
       title: videoTitle,
+      summary: "not yet generated",
       userId,
     })
     .returning({

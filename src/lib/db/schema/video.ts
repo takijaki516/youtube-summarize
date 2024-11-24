@@ -4,9 +4,9 @@ import { usersSchema } from "./auth";
 
 export const videosSchema = pgTable("video", {
   id: serial("id").primaryKey(),
-  title: text("title"),
-  url: text("url"),
-  summary: text("summary"),
+  title: text("title").notNull(),
+  url: text("url").notNull(),
+  summary: text("summary").notNull(),
   userId: text("userId")
     .notNull()
     .references(() => usersSchema.id, { onDelete: "cascade" }),

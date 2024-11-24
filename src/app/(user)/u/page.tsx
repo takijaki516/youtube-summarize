@@ -20,7 +20,7 @@ export default async function UserHomepage() {
     .where(eq(videosSchema.userId, session.user.id));
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center overflow-auto bg-background px-4">
+    <main className="flex flex-1 flex-col items-center overflow-auto bg-background px-4">
       {recentVideos.length > 0 ? <RecentContents /> : <NoContent />}
     </main>
   );

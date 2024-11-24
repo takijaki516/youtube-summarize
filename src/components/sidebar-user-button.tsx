@@ -33,7 +33,7 @@ export function SidebarUserButton({ session }: SidebarUserButtonProps) {
 
         <DropdownMenuContent align="start" side="right" className="w-fit">
           <DropdownMenuItem className="p-0">
-            <form action={signOutAction}>
+            <form action={signOutAction} className="w-full">
               <Button
                 type="submit"
                 variant="destructive"

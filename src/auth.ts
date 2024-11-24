@@ -24,7 +24,6 @@ export const {
     verificationTokensTable: verificationTokensSchema,
   }),
   pages: {
-    // REVIEW:
     signIn: "/login",
   },
   session: {
