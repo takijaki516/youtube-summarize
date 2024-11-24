@@ -8,7 +8,7 @@ import {
   mergeTranscript,
 } from "@/lib/llm/transcript";
 import { dbDrizzle } from "@/lib/db/drizzle";
-import { videos } from "@/lib/db/schema/video";
+import { videosSchema } from "@/lib/db/schema/video";
 import { generateSummary } from "@/lib/llm/summarize";
 
 export const POST = auth(async function POST(req) {
@@ -23,21 +23,21 @@ export const POST = auth(async function POST(req) {
   const videoTitle = videoInfo.videoDetails.title;
 
   const transcripts = await getTranscript(url);
-
   const mergedTranscript = mergeTranscript(transcripts);
   const summaryText = await generateSummary(mergedTranscript);
 
   const insertedVideo = await dbDrizzle
-    .insert(videos)
+    .insert(videosSchema)
     .values({
       url,
       title: videoTitle,
       userId,
     })
     .returning({
-      id: videos.id,
+      id: videosSchema.id,
     });
 
+  // store embedding and its offset(time) for lookup when generating links(timestamps)
   await embedTranscript(transcripts, insertedVideo[0].id, userId);
   await generateMarkdown(summaryText, url, insertedVideo[0].id);
 

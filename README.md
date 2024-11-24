@@ -3,4 +3,5 @@
 ## TODO
 
 - [ ]: fix zustand stores
-- [ ]: fix youtube api
+- [ ]: rate limit for not signed in users
+- [ ]: video page for not signed in users

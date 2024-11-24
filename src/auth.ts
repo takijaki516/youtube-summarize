@@ -4,10 +4,10 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { authConfig } from "./auth.config";
 import { dbDrizzle } from "./lib/db/drizzle";
 import {
-  accounts,
-  sessions,
-  users,
-  verificationTokens,
+  accountsSchema,
+  sessionsSchema,
+  usersSchema,
+  verificationTokensSchema,
 } from "./lib/db/schema/auth";
 
 export const {
@@ -18,10 +18,10 @@ export const {
 } = NextAuth({
   secret: process.env.AUTH_SECRET,
   adapter: DrizzleAdapter(dbDrizzle, {
-    usersTable: users,
-    accountsTable: accounts,
-    sessionsTable: sessions,
-    verificationTokensTable: verificationTokens,
+    usersTable: usersSchema,
+    accountsTable: accountsSchema,
+    sessionsTable: sessionsSchema,
+    verificationTokensTable: verificationTokensSchema,
   }),
   pages: {
     // REVIEW:

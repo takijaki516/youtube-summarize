@@ -2,7 +2,7 @@ import "next-auth/jwt";
 import type { User } from "next-auth";
 
 declare module "next-auth" {
-  interface Session {
+  export interface Session {
     user: User & {
       id: string;
     };

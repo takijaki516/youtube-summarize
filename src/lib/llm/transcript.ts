@@ -1,18 +1,17 @@
-import fs from "node:fs";
-// import { chromium } from "playwright";
 import { YoutubeTranscript } from "youtube-transcript";
+import { eq } from "drizzle-orm";
 
 import { TranscriptSegment } from "../../types/types";
 import { similarText } from "./embedding";
 import { dbDrizzle } from "../db/drizzle";
-import { videos } from "../db/schema/video";
-import { eq } from "drizzle-orm";
+import { videosSchema } from "../db/schema/video";
 
 export async function getTranscript(url: string): Promise<TranscriptSegment[]> {
   const transcripts = await YoutubeTranscript.fetchTranscript(url);
-
   let cur = 0;
 
+  // NOTE: how to evaluate if this is a good chunk size?
+  // chunking transcript for embedding vectors
   while (cur < transcripts.length - 1) {
     if (transcripts[cur].text.length < 125) {
       transcripts[cur].text += ` ${transcripts[cur + 1].text}`;
@@ -57,13 +56,11 @@ export async function generateMarkdown(
   }
 
   await dbDrizzle
-    .update(videos)
+    .update(videosSchema)
     .set({
       summary: transcript,
     })
-    .where(eq(videos.id, videoId));
-
-  fs.writeFileSync("summarized_transcript.md", transcript);
+    .where(eq(videosSchema.id, videoId));
 }
 
 async function processPlaceholder(
@@ -71,34 +68,19 @@ async function processPlaceholder(
   url: string,
   videoId: number,
 ) {
-  let deteleTimeFromURL = url.replace(/&t=\d+s/, "");
+  // remove the timestamp from the url
+  let sanitizedURL = url.replace(/&t=\d+s/, "");
 
-  if (placeholder.startsWith("<PICTURE:")) {
-    const description = placeholder.slice(9, -1);
-    const result = await similarText(description, videoId);
-
-    const timestamp = result.start;
-    const formattedTime = secondsToHMS(timestamp);
-
-    const imageFileName = `frames/screenshot-${timestamp}.jpg`;
-    const hyperlink = `${deteleTimeFromURL}&t=${timestamp}s`;
-    // await takeYouTubeVideoScreenshot(
-    //   deteleTimeFromURL,
-    //   timestamp,
-    //   imageFileName,
-    // );
-
-    return `<img src="${imageFileName}" alt="${description}" width="450" /> <br /> [Jump to this part of the video: ${formattedTime}](${hyperlink})`;
-  } else if (placeholder.startsWith("<HYPERLINK:")) {
+  if (placeholder.startsWith("<HYPERLINK:")) {
     const text = placeholder.slice(11, -1);
     const result = await similarText(text, videoId);
 
     const timestamp = result.start;
     const formattedTime = secondsToHMS(timestamp);
 
-    const hyperlink = `${deteleTimeFromURL}&t=${timestamp}s`;
+    const hyperlink = `${sanitizedURL}&t=${timestamp}s`;
 
-    return `[Jump to this part of the video: ${formattedTime}](${hyperlink})`;
+    return `[YOUTUBE VIDEO: ${formattedTime}](${hyperlink})`;
   } else {
     return placeholder;
   }
@@ -117,43 +99,3 @@ function secondsToHMS(time: number): string {
 
   return `${hours}:${minutes}:${seconds}`;
 }
-
-// async function takeYouTubeVideoScreenshot(
-//   videoUrl: string,
-//   timestamp: number,
-//   outputPath: string,
-// ) {
-//   const browser = await chromium.launch();
-//   const page = await browser.newPage();
-
-//   try {
-//     // Navigate to the YouTube video
-//     await page.goto(videoUrl);
-
-//     // Wait for the video player to load
-//     await page.waitForSelector("video");
-
-//     // Seek to the specified timestamp
-//     await page.evaluate((time) => {
-//       const video = document.querySelector("video");
-//       if (video) {
-//         video.currentTime = time;
-//       }
-//     }, timestamp);
-
-//     // Wait for the video to load at the new timestamp
-//     await page.waitForTimeout(1000); // Adjust this value if needed
-
-//     // Find the video player element
-//     const videoPlayer = await page.locator("#movie_player");
-
-//     // Take the screenshot of only the video player
-//     await videoPlayer.screenshot({ path: outputPath });
-
-//     console.log(`Screenshot saved to ${outputPath}`);
-//   } catch (error) {
-//     console.error("An error occurred:", error);
-//   } finally {
-//     await browser.close();
-//   }
-// }

@@ -17,27 +17,8 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   return (
     <div className="prose max-w-none overflow-y-auto p-10 dark:prose-invert">
       <ReactMarkdown
-        // remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw]}
         components={{
-          // code({ node, inline, className, children, ...props }) {
-          //   const match = /language-(\w+)/.exec(className || "");
-          //   return !inline && match ? (
-          //     <SyntaxHighlighter
-          //       style={atomDark}
-          //       language={match[1]}
-          //       PreTag="div"
-          //       {...props}
-          //     >
-          //       {String(children).replace(/\n$/, "")}
-          //     </SyntaxHighlighter>
-          //   ) : (
-          //     <code className={className} {...props}>
-          //       {children}
-          //     </code>
-          //   );
-          // },
-
           a({ href, children }) {
             const hhmmss = (children as string).slice(
               (children as string).length - 8,
@@ -52,13 +33,8 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
               </Button>
             );
           },
-
           br({ children }) {
             return <br />;
-          },
-
-          img: (props) => {
-            return <span>F</span>;
           },
           hr: () => <hr className="my-4 border-t border-gray-300" />,
           p: ({ node, ...props }) => <p className="mb-4" {...props} />,

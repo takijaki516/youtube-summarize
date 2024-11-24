@@ -6,7 +6,6 @@ import { ModeToggle } from "./theme-toggle";
 import { auth } from "@/auth";
 import { GoogleLoginButton } from "./login-button";
 import { UserDialog } from "./user-dialog";
-import { cn } from "@/lib/utils";
 import { buttonVariants } from "./ui/button";
 
 export async function Navbar() {
@@ -34,7 +33,7 @@ export async function Navbar() {
 
         {session ? <UserDialog /> : <GoogleLoginButton />}
 
-        <ModeToggle />
+        <ModeToggle side="bottom" align="end" />
       </nav>
     </header>
   );

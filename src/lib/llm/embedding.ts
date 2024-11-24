@@ -1,9 +1,9 @@
-import { cosineDistance, eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import pgvector from "pgvector";
 
 import { SimilarSearchResult, TranscriptSegment } from "../../types/types";
 import { dbDrizzle } from "../db/drizzle";
-import { embeddings } from "../db/schema/embedding";
+import { embeddingsSchema } from "../db/schema/embedding";
 import { openai } from "./openai";
 
 // Function to get embedding from OpenAI
@@ -24,7 +24,7 @@ async function storeEmbedding(
 ): Promise<void> {
   const language = segment.lang || "en";
 
-  await dbDrizzle.insert(embeddings).values({
+  await dbDrizzle.insert(embeddingsSchema).values({
     embedding: embedding,
     text: segment.text,
     lang: language,
@@ -57,8 +57,8 @@ export async function similarText(
 
   const result = await dbDrizzle.execute(sql`
     SELECT text, start, lang, 1 - (embedding <=> ${pgQueryEmbedding}) AS cosine_similarity
-    FROM ${embeddings}
-    WHERE ${embeddings.videoId} = ${videoId}
+    FROM ${embeddingsSchema}
+    WHERE ${embeddingsSchema.videoId} = ${videoId}
     ORDER BY cosine_similarity DESC
     LIMIT ${limit}
   `);

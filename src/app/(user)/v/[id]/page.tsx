@@ -2,27 +2,22 @@ import { eq } from "drizzle-orm";
 
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { dbDrizzle } from "@/lib/db/drizzle";
-import { videos } from "@/lib/db/schema/video";
+import { videosSchema } from "@/lib/db/schema/video";
 import { YouTubePlayer } from "@/components/youtube-player";
 import { ResizableView } from "@/components/resizable-view";
 
-export default async function ChagePage({
+export default async function VideoPage({
   params,
 }: {
   params: { id: string };
 }) {
   const video = await dbDrizzle
     .select()
-    .from(videos)
-    .where(eq(videos.id, +params.id))
+    .from(videosSchema)
+    .where(eq(videosSchema.id, +params.id))
     .limit(1);
 
-  // console.log("🚀 ~ file: page.tsx:17 ~ video:", video);
-  // console.log("🚀 ~ file: page.tsx:17 ~ video:", video[0]);
-  // console.log("🚀 ~ file: page.tsx:17 ~ video:", video.length);
-
   const VID = getYouTubeVideoId(video[0].url!);
-  console.log("🚀 ~ file: page.tsx:24 ~ VID:", VID);
 
   return (
     <main className="flex flex-1 items-center bg-background">

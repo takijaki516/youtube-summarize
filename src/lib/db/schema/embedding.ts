@@ -1,9 +1,16 @@
-import { vector, pgTable, text, integer, serial } from "drizzle-orm/pg-core";
+import {
+  vector,
+  pgTable,
+  text,
+  integer,
+  serial,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
-import { users } from "./auth";
-import { videos } from "./video";
+import { usersSchema } from "./auth";
+import { videosSchema } from "./video";
 
-export const embeddings = pgTable("embedding", {
+export const embeddingsSchema = pgTable("embedding", {
   id: serial("id").primaryKey(),
   embedding: vector("embedding", { dimensions: 1536 }),
   text: text("text"),
@@ -11,8 +18,11 @@ export const embeddings = pgTable("embedding", {
   start: integer("start"),
   userId: text("userId")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    .references(() => usersSchema.id, { onDelete: "cascade" }),
   videoId: integer("videoId")
     .notNull()
-    .references(() => videos.id, { onDelete: "cascade" }),
+    .references(() => videosSchema.id, { onDelete: "cascade" }),
+
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
