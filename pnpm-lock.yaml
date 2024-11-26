@@ -211,24 +211,30 @@ importers:
         specifier: link:@types/youtube
         version: link:@types/youtube
 
-  apps/worker:
+  apps/workers:
     dependencies:
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@types/node-cron':
+        specifier: ^3.0.11
+        version: 3.0.11
       drizzle-orm:
         specifier: ^0.33.0
         version: 0.33.0(@opentelemetry/api@1.9.0)(@types/react@18.3.12)(postgres@3.4.5)(react@18.3.1)
       node-cron:
-        specifier: ^3.0.3
+        specifier: ^3.0.2
         version: 3.0.3
     devDependencies:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
-      '@types/node-cron':
-        specifier: ^3.0.11
-        version: 3.0.11
+      '@types/node':
+        specifier: ^20.16.5
+        version: 20.17.7
+      tsx:
+        specifier: ^4.19.1
+        version: 4.19.2
 
   packages/database:
     dependencies:
