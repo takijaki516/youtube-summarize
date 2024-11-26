@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "./ui/button";
 import {
@@ -13,11 +14,7 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Input } from "./ui/input";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "./ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export function AddVideoDialog() {
   const [url, setUrl] = useState("");
@@ -28,19 +25,32 @@ export function AddVideoDialog() {
   const generateSummary = async () => {
     setIsLoading(true);
 
-    const res = await fetch("/api/transcript", {
-      method: "POST",
-      body: JSON.stringify({
-        url,
-      }),
-    });
+    try {
+      const res = await fetch("/api/transcript", {
+        method: "POST",
+        body: JSON.stringify({
+          url,
+        }),
+      });
 
-    const vId = (await res.json()).vId;
+      if (res.status === 429) {
+        toast.error("Rate limit exceeded. Please try again later.");
+        return;
+      }
 
-    router.push(`/v/${vId}`);
-    setIsLoading(false);
-    setUrl("");
-    setIsOpen(false);
+      if (!res.ok) {
+        throw new Error("Failed to generate summary");
+      }
+
+      const vId = (await res.json()).vId;
+      router.push(`/v/${vId}`);
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+      setUrl("");
+      setIsOpen(false);
+    }
   };
 
   const handleOpenChange = (open: boolean) => {

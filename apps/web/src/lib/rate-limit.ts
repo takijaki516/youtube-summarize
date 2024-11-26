@@ -1,5 +1,5 @@
 import { dbDrizzle, rateLimitsSchema } from "@repo/database";
-import { gt, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 export class RateLimitError extends Error {
   constructor(message: string) {
@@ -18,7 +18,6 @@ export async function checkRateLimit(
     const now = new Date();
     const resetAt = new Date(now.getTime() + windowMs);
 
-    // Try to update existing rate limit
     const [updated] = await dbDrizzle
       .insert(rateLimitsSchema)
       .values({
@@ -28,9 +27,16 @@ export async function checkRateLimit(
       })
       .onConflictDoUpdate({
         target: rateLimitsSchema.key,
-        where: gt(rateLimitsSchema.resetAt, now),
         set: {
-          count: sql`${rateLimitsSchema.count} + 1`,
+          // Reset count if window expired, otherwise increment
+          count: sql`CASE 
+            WHEN ${rateLimitsSchema.resetAt} <= ${now.toISOString()} THEN 1 
+            ELSE ${rateLimitsSchema.count} + 1 
+          END`,
+          resetAt: sql`CASE 
+            WHEN ${rateLimitsSchema.resetAt} <= ${now.toISOString()} THEN ${resetAt.toISOString()} 
+            ELSE ${rateLimitsSchema.resetAt}
+          END`,
           updatedAt: now,
         },
       })

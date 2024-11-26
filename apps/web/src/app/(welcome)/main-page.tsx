@@ -14,38 +14,32 @@ export function MainPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [url, setUrl] = React.useState("");
 
-  // TODO: implement rate limiting
   const generateSummary = async () => {
     setIsLoading(true);
 
-    const res = await fetch("/api/temp", {
-      method: "POST",
-      body: JSON.stringify({
-        url,
-      }),
-    });
+    try {
+      const res = await fetch("/api/temp", {
+        method: "POST",
+        body: JSON.stringify({ url }),
+      });
 
-    if (!res.ok) {
-      if (res.status === 429) {
-        toast.error("Too many requests");
-        return;
+      if (!res.ok) {
+        if (res.status === 429) {
+          toast.error(
+            "Rate limit exceeded. Please try again later, or Sign up for more requests.",
+          );
+          return;
+        }
+        throw new Error("Failed to generate summary");
       }
 
-      toast.error("Something went wrong");
+      const { vId } = await res.json();
+      router.push(`/temp/${vId}`);
+    } catch (error) {
+      toast.error("Something went wrong generating the summary");
+    } finally {
       setIsLoading(false);
-
-      return;
     }
-
-    const resJson = await res.json();
-    console.log(
-      "🚀 ~ file: main-page.tsx:34 ~ generateSummary ~ resJson:",
-      resJson,
-    );
-
-    // router.push(`/temp/${vId}`);
-
-    setIsLoading(false);
   };
 
   return (

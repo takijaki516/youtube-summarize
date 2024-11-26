@@ -1,9 +1,9 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthResult } from "next-auth";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 
-import { dbDrizzle } from "@repo/database";
 import { authConfig } from "@/auth.config";
 import {
+  dbDrizzle,
   accountsSchema,
   sessionsSchema,
   usersSchema,
@@ -15,7 +15,7 @@ export const {
   auth,
   signIn,
   signOut,
-} = NextAuth({
+}: NextAuthResult = NextAuth({
   secret: process.env.AUTH_SECRET,
   adapter: DrizzleAdapter(dbDrizzle, {
     usersTable: usersSchema,

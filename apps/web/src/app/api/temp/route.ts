@@ -17,8 +17,8 @@ export async function POST(req: Request) {
     const headersList = headers();
     const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
 
-    // 5 requests per minute per IP
-    await checkRateLimit(`temp:${ip}`, 2, 60 * 1000);
+    // 2 requests per 10 minutes per IP
+    await checkRateLimit(`temp:${ip}`, 2, 10 * 60 * 1000);
 
     const { url } = await req.json();
 
@@ -45,18 +45,22 @@ export async function POST(req: Request) {
         id: tempVideosSchema.id,
       });
 
-    // store embedding and its offset(time) for lookup when generating links(timestamps)
+    const videoId = insertedVideo[0]?.id;
+    if (!videoId) {
+      throw new Error("Video ID is undefined");
+    }
+
     await embedTranscript(transcripts, {
-      videoId: insertedVideo[0].id,
+      videoId,
       isTemp: true,
     });
     await generateMarkdown(tempSummaryText, url, {
-      videoId: insertedVideo[0].id,
+      videoId: videoId,
       isTemp: true,
     });
 
     return Response.json(
-      { message: "Embedded Transcript", vId: insertedVideo[0].id },
+      { message: "Embedded Transcript", vId: videoId },
       { status: 201 },
     );
   } catch (error) {

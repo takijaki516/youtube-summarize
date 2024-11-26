@@ -1,7 +1,7 @@
 import ytdl from "ytdl-core";
 
 import { auth } from "@/auth";
-import { dbDrizzle, videosSchema } from "@repo/database";
+import { dbDrizzle, videosSchema, userRateLimitsSchema } from "@repo/database";
 import { embedTranscript } from "@/lib/llm/embedding";
 import {
   generateMarkdown,
@@ -9,14 +9,47 @@ import {
   mergeTranscript,
 } from "@/lib/llm/transcript";
 import { generateSummary } from "@/lib/llm/summarize";
+import { eq, gt } from "drizzle-orm";
 
 export const POST = auth(async function POST(req) {
   if (!req.auth) {
     return Response.json({ message: "Unauthorized" }, { status: 401 });
   }
+  const userId = req.auth.user.id;
+
+  // Check rate limit
+  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+  const userLimit = await dbDrizzle
+    .select()
+    .from(userRateLimitsSchema)
+    .where(eq(userRateLimitsSchema.userId, userId));
+
+  if (userLimit[0]) {
+    if (userLimit[0].lastReset < tenMinutesAgo) {
+      // Reset counter if 10 minutes have passed
+      await dbDrizzle
+        .update(userRateLimitsSchema)
+        .set({ requestCount: 1, lastReset: new Date() })
+        .where(eq(userRateLimitsSchema.userId, userId));
+    } else if (userLimit[0].requestCount >= 5) {
+      return Response.json({ message: "Rate limit exceeded" }, { status: 429 });
+    } else {
+      // Increment counter
+      await dbDrizzle
+        .update(userRateLimitsSchema)
+        .set({ requestCount: userLimit[0].requestCount + 1 })
+        .where(eq(userRateLimitsSchema.userId, userId));
+    }
+  } else {
+    // Create new rate limit record
+    await dbDrizzle.insert(userRateLimitsSchema).values({
+      userId,
+      requestCount: 1,
+      lastReset: new Date(),
+    });
+  }
 
   const { url } = await req.json();
-  const userId = req.auth.user.id;
 
   const videoInfo = await ytdl.getInfo(url);
   const videoTitle = videoInfo.videoDetails.title;
@@ -37,6 +70,13 @@ export const POST = auth(async function POST(req) {
     .returning({
       id: videosSchema.id,
     });
+
+  if (!insertedVideo[0]) {
+    return Response.json(
+      { message: "Failed to insert video" },
+      { status: 500 },
+    );
+  }
 
   // store embedding and its offset(time) for lookup when generating links(timestamps)
   await embedTranscript(transcripts, {
