@@ -1,37 +1,54 @@
 FROM node:20-alpine AS base
-RUN npm i -g pnpm
+# Add these lines to set up pnpm global
+ENV PNPM_HOME="/root/.local/share/pnpm"
+ENV PATH="${PATH}:${PNPM_HOME}"
+RUN npm install --global pnpm
+RUN pnpm add --global turbo@^2
 
-# deps
-FROM base AS deps
-WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
 
-# builder
 FROM base AS builder
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk update
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN pnpm run build
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# Uncomment the following line in case you want to disable telemetry during the build.
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN turbo prune @repo/web --docker
 
-# Runner
-FROM base AS runner
+
+FROM base AS installer
+RUN apk update
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
+# First install the dependencies (as they change less often)
+COPY --from=builder /app/out/json/ .
+RUN pnpm install
+# Copy full source
+COPY --from=builder /app/out/full/ .
+# build the project
+RUN turbo build
 
+
+# TODO use slim image
+FROM node:20.15-bookworm-slim AS runner
+WORKDIR /app
 ENV NODE_ENV=production
-
+# Uncomment the following line in case you want to disable telemetry during runtime.
+ENV NEXT_TELEMETRY_DISABLED=1
+# Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
 USER nextjs
-
-EXPOSE 3000
-
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=installer --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+# Copy static files
+COPY --from=installer /app/apps/web/public ./apps/web/public
+COPY --from=installer --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
-
-CMD ["node", "server.js"]
+EXPOSE 3000
+CMD ["node", "apps/web/server.js"]

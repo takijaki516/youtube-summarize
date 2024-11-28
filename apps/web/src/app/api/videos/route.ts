@@ -22,7 +22,7 @@ export const GET = auth(async function GET(request: Request) {
     .select({ count: sql`count(*)` })
     .from(videosSchema)
     .where(sql`title ILIKE ${`%${search}%`}`)
-    .then((res) => Number(res[0].count));
+    .then((res) => Number(res[0]?.count));
 
   return Response.json({
     videos,

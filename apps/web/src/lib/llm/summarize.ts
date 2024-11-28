@@ -68,7 +68,7 @@ export async function generateSummary(transcript: string): Promise<string> {
     });
 
     const generatedSummary =
-      response.choices[0].message.content || "Unable to generate summary.";
+      response.choices[0]?.message?.content || "Unable to generate summary.";
 
     return generatedSummary;
   } catch (error) {

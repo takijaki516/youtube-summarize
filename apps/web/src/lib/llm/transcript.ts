@@ -12,8 +12,8 @@ export async function getTranscript(url: string): Promise<TranscriptSegment[]> {
   // NOTE: how to evaluate if this is a good chunk size?
   // chunking transcript for embedding vectors
   while (cur < transcripts.length - 1) {
-    if (transcripts[cur].text.length < 125) {
-      transcripts[cur].text += ` ${transcripts[cur + 1].text}`;
+    if (transcripts[cur]!.text.length < 125) {
+      transcripts[cur]!.text += ` ${transcripts[cur + 1]!.text}`;
       transcripts.splice(cur + 1, 1);
     } else {
       cur++;

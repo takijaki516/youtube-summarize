@@ -7,6 +7,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "db:init": "pnpm tsx scripts/init.ts",
     "db:generate": "drizzle-kit generate",
     "db:seed": "pnpm tsx scripts/seed.ts",
     "db:migrate": "pnpm tsx scripts/migrate.ts",
@@ -16,7 +17,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@auth/drizzle-adapter": "^1.5.0",
+    "@auth/core": "^0.37.4",
+    "@auth/drizzle-adapter": "^1.7.4",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.33.0",
     "postgres": "^3.4.4"

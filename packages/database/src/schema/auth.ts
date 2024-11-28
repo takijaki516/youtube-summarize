@@ -6,7 +6,7 @@ import {
   primaryKey,
   integer,
 } from "drizzle-orm/pg-core";
-import type { AdapterAccountType } from "next-auth/adapters";
+import type { AdapterAccountType } from "@auth/core/adapters";
 
 export const usersSchema = pgTable("user", {
   id: text("id")

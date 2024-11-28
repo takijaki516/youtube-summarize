@@ -1,0 +1,62 @@
+services:
+  next_web:
+    container_name: next_web
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    image: youtube-summarize-nextjs
+    ports:
+      - 3000:3000
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@next_db:5432/youtube_summarize
+      - AUTH_URL=http://localhost:3000/api/auth
+    depends_on:
+      next_db:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully # Waits for exit code 0
+
+  migrations:
+    build:
+      context: .
+      dockerfile: ./packages/database/Dockerfile
+    restart: "no"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@next_db:5432/youtube_summarize
+    depends_on:
+      next_db:
+        condition: service_healthy
+
+  next_db:
+    container_name: next_db
+    image: pgvector/pgvector:pg16
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=youtube_summarize
+    ports:
+      - 5433:5432
+    volumes:
+      - youtube_summarize_postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-U",
+          "postgres",
+          "-d",
+          "youtube_summarize",
+          "-h",
+          "localhost",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  youtube_summarize_postgres_data:

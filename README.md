@@ -7,3 +7,4 @@
 - [0]: rate limit(5 requests per 5 minutes) for signed in users
 - [0]: video page for not signed in users
 - [0]: add cron job to delete temp videos older than 1 day
+- [ ]: error handling

@@ -25,7 +25,9 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
             );
             // hhmmss to seconds
             const [hours, minutes, seconds] = hhmmss.split(":").map(Number);
-            const timestamp = hours * 3600 + minutes * 60 + seconds;
+            // TODO: handle undefined
+            const timestamp =
+              (hours ?? 0) * 3600 + (minutes ?? 0) * 60 + (seconds ?? 0);
 
             return (
               <span
