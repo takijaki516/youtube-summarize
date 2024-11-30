@@ -6,19 +6,58 @@ import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ecs_patterns from "aws-cdk-lib/aws-ecs-patterns";
-import * as rds from "aws-cdk-lib/aws-rds";
-import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import * as ecr from "aws-cdk-lib/aws-ecr";
+import * as secretsManager from "aws-cdk-lib/aws-secretsmanager";
 
 interface EcsFargateStackProps extends cdk.StackProps {
-  dbInstance: rds.DatabaseInstance;
-  dbSecrets: secretsmanager.Secret;
   vpc: ec2.Vpc;
 }
 
 export class EcsFargateStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: EcsFargateStackProps) {
     super(scope, id, props);
+
+    const openAiSecret = new secretsManager.Secret(this, "OpenAiApiKeySecret", {
+      secretStringValue: cdk.SecretValue.unsafePlainText(
+        process.env.OPENAI_API_KEY!
+      ),
+    });
+
+    const authSecret = new secretsManager.Secret(this, "AuthSecretSecret", {
+      secretStringValue: cdk.SecretValue.unsafePlainText(
+        process.env.AUTH_SECRET!
+      ),
+    });
+
+    const authGoogleIdSecret = new secretsManager.Secret(
+      this,
+      "AuthGoogleIdSecret",
+      {
+        secretStringValue: cdk.SecretValue.unsafePlainText(
+          process.env.AUTH_GOOGLE_ID!
+        ),
+      }
+    );
+
+    const authGoogleSecret = new secretsManager.Secret(
+      this,
+      "AuthGoogleSecretSecret",
+      {
+        secretStringValue: cdk.SecretValue.unsafePlainText(
+          process.env.AUTH_GOOGLE_SECRET!
+        ),
+      }
+    );
+
+    const databaseUrlSecret = new secretsManager.Secret(
+      this,
+      "DatabaseUrlSecret",
+      {
+        secretStringValue: cdk.SecretValue.unsafePlainText(
+          process.env.DATABASE_URL!
+        ),
+      }
+    );
 
     // VPC
     const vpc = props.vpc;
@@ -29,8 +68,8 @@ export class EcsFargateStack extends cdk.Stack {
     });
 
     // Route53 zone
-    const zone = route53.HostedZone.fromLookup(this, "Zone", {
-      domainName: "taekgogo.com", // Replace with your domain
+    const zone = route53.HostedZone.fromLookup(this, "HostedZone", {
+      domainName: "taekgogo.com",
     });
 
     // TLS certificate
@@ -41,13 +80,6 @@ export class EcsFargateStack extends cdk.Stack {
         domainName: "app.taekgogo.com", // Replace with your subdomain
         validation: certificatemanager.CertificateValidation.fromDns(zone),
       }
-    );
-
-    // Allow ECS tasks to access RDS
-    props.dbInstance.connections.allowFrom(
-      cluster.connections,
-      ec2.Port.tcp(5432),
-      "Allow access from ECS tasks"
     );
 
     // Add ECR repository
@@ -64,33 +96,50 @@ export class EcsFargateStack extends cdk.Stack {
         "YoutubeSummarizeService",
         {
           cluster,
-          memoryLimitMiB: 2048,
-          cpu: 1024,
+          memoryLimitMiB: 1024,
+          cpu: 512,
           desiredCount: 1,
+          // task definition
           taskImageOptions: {
-            image: ecs.ContainerImage.fromEcrRepository(repository, "latest"),
+            containerName: "youtube-summarize",
+            // NOTE: v0 is the initial version of the image
+            image: ecs.ContainerImage.fromEcrRepository(repository, "v0"),
             containerPort: 3000,
-            // TODO: 
             environment: {
               NODE_ENV: "production",
-              DB_HOST: props.dbInstance.instanceEndpoint.hostname,
-              DB_PORT: "5432",
-              DB_NAME: "youtube_summarize",
+              AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST!,
             },
             secrets: {
-              DB_CREDENTIALS: ecs.Secret.fromSecretsManager(props.dbSecrets),
+              OPENAI_API_KEY: ecs.Secret.fromSecretsManager(openAiSecret),
+              AUTH_SECRET: ecs.Secret.fromSecretsManager(authSecret),
+              AUTH_GOOGLE_ID: ecs.Secret.fromSecretsManager(authGoogleIdSecret),
+              AUTH_GOOGLE_SECRET:
+                ecs.Secret.fromSecretsManager(authGoogleSecret),
+              DATABASE_URL: ecs.Secret.fromSecretsManager(databaseUrlSecret),
             },
           },
+          // healthCheck: {
+          //   // simple TCP health check
+          //   command: ["CMD-SHELL", "nc", "-z", "localhost", "3000"],
+          //   interval: cdk.Duration.seconds(30),
+          //   timeout: cdk.Duration.seconds(5),
+          //   retries: 3,
+          //   startPeriod: cdk.Duration.seconds(60),
+          // },
           publicLoadBalancer: true,
           certificate: certificate,
           redirectHTTP: true,
+          runtimePlatform: {
+            cpuArchitecture: ecs.CpuArchitecture.X86_64,
+            operatingSystemFamily: ecs.OperatingSystemFamily.LINUX,
+          },
         }
       );
 
     // autoscale
     const scaling = fargateService.service.autoScaleTaskCount({
       minCapacity: 1,
-      maxCapacity: 4,
+      maxCapacity: 2,
     });
 
     scaling.scaleOnCpuUtilization("CpuScaling", {

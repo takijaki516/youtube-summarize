@@ -1,0 +1,12 @@
+{
+  "availability-zones:account=767397928878:region=ap-northeast-2": [
+    "ap-northeast-2a",
+    "ap-northeast-2b",
+    "ap-northeast-2c",
+    "ap-northeast-2d"
+  ],
+  "hosted-zone:account=767397928878:domainName=taekgogo.com:region=ap-northeast-2": {
+    "Id": "/hostedzone/Z04487994RXAWDH28LJU",
+    "Name": "taekgogo.com."
+  }
+}

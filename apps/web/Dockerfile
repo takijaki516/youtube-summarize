@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM --platform=linux/amd64 node:20-alpine AS base
 # Add these lines to set up pnpm global
 ENV PNPM_HOME="/root/.local/share/pnpm"
 ENV PATH="${PATH}:${PNPM_HOME}"
@@ -33,7 +33,7 @@ RUN turbo build
 
 
 # TODO use slim image
-FROM node:20.15-bookworm-slim AS runner
+FROM --platform=linux/amd64 node:20.15-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 # Uncomment the following line in case you want to disable telemetry during runtime.
