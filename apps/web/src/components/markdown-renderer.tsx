@@ -5,7 +5,6 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 
 import { useYouTubeStore } from "../lib/store/use-youtube-store";
-import { Button } from "./ui/button";
 
 type MarkdownRendererProps = {
   content: string;
@@ -38,7 +37,6 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
               </span>
             );
           },
-
           img({ src, alt }) {
             return null;
           },

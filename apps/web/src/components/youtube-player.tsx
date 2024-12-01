@@ -4,8 +4,9 @@ import { useYouTubeStore } from "../lib/store/use-youtube-store";
 import * as React from "react";
 
 export const YouTubePlayer = React.memo(({ videoId }: { videoId: string }) => {
-  const { startTime, setCurrentTime } = useYouTubeStore();
+  const { startTime, setStartTime } = useYouTubeStore();
   const playerRef = React.useRef<YT.Player | null>(null);
+  const videoIdRef = React.useRef<string | null>(videoId);
 
   React.useEffect(() => {
     const tag = document.createElement("script");
@@ -14,23 +15,30 @@ export const YouTubePlayer = React.memo(({ videoId }: { videoId: string }) => {
     firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
 
     if (!window.YT) {
+      // YouTube's API will call onYouTubeIframeAPIReady automatically
       window.onYouTubeIframeAPIReady = initPlayer;
     } else {
+      // API already loaded, call initPlayer immediately
       initPlayer();
     }
 
     function initPlayer() {
-      if (playerRef.current) {
-        playerRef.current.destroy();
-      }
+      // NOTE: useEffect's cleanup function will destroy the player when effect re-runs
+      // if (playerRef.current) {
+      //   playerRef.current.destroy();
+      // }
 
-      playerRef.current = new YT.Player("youtube-player", {
-        videoId: videoId,
-        events: {
-          onReady: onPlayerReady,
-          onStateChange: onPlayerStateChange,
-        },
-      });
+      if (!playerRef.current) {
+        playerRef.current = new YT.Player("youtube-player", {
+          videoId: videoId,
+          playerVars: {
+            origin: window.location.origin,
+          },
+          events: {
+            onReady: onPlayerReady,
+          },
+        });
+      }
     }
 
     function onPlayerReady(event: YT.PlayerEvent) {
@@ -39,36 +47,14 @@ export const YouTubePlayer = React.memo(({ videoId }: { videoId: string }) => {
       }
     }
 
-    function onPlayerStateChange(event: YT.OnStateChangeEvent) {
-      if (event.data === YT.PlayerState.PLAYING) {
-        const updateTime = () => {
-          if (playerRef.current && playerRef.current.getCurrentTime) {
-            setCurrentTime(playerRef.current.getCurrentTime());
-          }
-        };
-
-        const intervalId = setInterval(updateTime, 1000);
-
-        return () => clearInterval(intervalId);
-      }
-    }
-
-    window.onYouTubeIframeAPIReady = () => {
-      playerRef.current = new YT.Player("youtube-player", {
-        videoId: videoId,
-        events: {
-          onReady: onPlayerReady,
-          onStateChange: onPlayerStateChange,
-        },
-      });
-    };
-
     return () => {
-      if (playerRef.current) {
+      // NOTE: only destroy when component unmounts or videoId changes
+      if (playerRef.current && videoIdRef.current !== videoId) {
         playerRef.current.destroy();
+        playerRef.current = null;
       }
     };
-  }, [videoId, startTime, setCurrentTime]);
+  }, [videoId, startTime]);
 
   React.useEffect(() => {
     if (playerRef.current && playerRef.current.seekTo) {

@@ -13,11 +13,10 @@ export function VideoCard({ video }: { video: Video }) {
   const [isDeleting, setIsDeleting] = React.useState(false);
   const queryClient = useQueryClient();
 
-  // TODO: add try catch to handle errors
   const deleteVideo = async () => {
-    setIsDeleting(true);
-
     try {
+      setIsDeleting(true);
+
       const res = await fetch(`/api/videos`, {
         headers: {
           "Content-Type": "application/json",
@@ -26,17 +25,18 @@ export function VideoCard({ video }: { video: Video }) {
         body: JSON.stringify({ id: video.id }),
       });
 
-      if (res.ok) {
-        toast.success("Video deleted successfully");
-        queryClient.invalidateQueries({ queryKey: ["videos"] });
-      } else {
+      if (!res.ok) {
         toast.error("Failed to delete video");
+        return;
       }
-    } catch (error) {
-      toast.error(error as string);
-    }
 
-    setIsDeleting(false);
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+      toast.success("Video deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete video");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (

@@ -33,13 +33,14 @@ export function AddVideoDialog() {
         }),
       });
 
-      if (res.status === 429) {
-        toast.error("Rate limit exceeded. Please try again later.");
-        return;
-      }
-
       if (!res.ok) {
-        throw new Error("Failed to generate summary");
+        if (res.status === 429) {
+          toast.error("Rate limit exceeded. Please try again later.");
+          return;
+        }
+
+        toast.error("Failed to generate summary");
+        return;
       }
 
       const vId = (await res.json()).vId;

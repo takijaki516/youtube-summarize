@@ -6,6 +6,8 @@ import { dbDrizzle, videosSchema } from "@repo/database";
 import { NoContent } from "./no-content";
 import { RecentContents } from "./recent-contents";
 
+export const dynamic = "force-dynamic";
+
 export default async function UserHomepage() {
   const session = await auth();
 

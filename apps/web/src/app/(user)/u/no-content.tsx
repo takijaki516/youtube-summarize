@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { Send, RotateCw } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,19 +14,38 @@ export function NoContent() {
   const [url, setUrl] = React.useState("");
 
   const generateSummary = async () => {
-    setIsLoading(true);
+    if (!url) {
+      toast.error("Please enter a valid URL");
+      return;
+    }
 
-    const res = await fetch("/api/transcript", {
-      method: "POST",
-      body: JSON.stringify({
-        url,
-      }),
-    });
+    try {
+      setIsLoading(true);
 
-    const vId = (await res.json()).vId;
+      const res = await fetch("/api/transcript", {
+        method: "POST",
+        body: JSON.stringify({
+          url,
+        }),
+      });
 
-    router.push(`/v/${vId}`);
-    setIsLoading(false);
+      if (!res.ok) {
+        if (res.status === 429) {
+          toast.error("Rate limit exceeded. Please try again later.");
+          return;
+        }
+
+        toast.error("Failed to generate summary");
+        return;
+      }
+
+      const vId = (await res.json()).vId;
+      router.push(`/v/${vId}`);
+    } catch (error) {
+      toast.error("Failed to generate summary");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -39,7 +59,7 @@ export function NoContent() {
           type=""
           id="url"
           placeholder="youtube url"
-          className="w-full"
+          className="w-full border-primary/80 focus:border-none"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />

@@ -6,19 +6,21 @@ import { GoogleLoginButton } from "./login-button";
 
 export function Navbar() {
   return (
-    <header className="container sticky top-0 flex h-16 items-center justify-between bg-background/50 py-8 backdrop-blur-lg">
+    <nav className="container sticky top-0 flex h-16 items-center justify-between bg-background py-8">
       <Link
-        className="flex items-center justify-center text-2xl font-bold text-foreground"
+        className="flex items-center justify-center text-2xl font-bold text-primary transition-opacity hover:opacity-80"
         href="/"
       >
-        <Home className="mr-2 block h-6 w-6 lg:hidden" />
-        <span className="hidden font-bold lg:inline">YT Summarizer</span>
+        <Home className="mr-2 block h-6 w-6 transition-transform hover:scale-110 lg:hidden" />
+        <span className="hidden font-bold transition-colors hover:text-primary/90 lg:inline">
+          YT Summarizer
+        </span>
       </Link>
 
-      <nav className="flex items-center gap-4 sm:gap-6">
+      <div className="flex items-center gap-4 sm:gap-6">
         <GoogleLoginButton />
         <ModeToggle side="bottom" align="end" />
-      </nav>
-    </header>
+      </div>
+    </nav>
   );
 }

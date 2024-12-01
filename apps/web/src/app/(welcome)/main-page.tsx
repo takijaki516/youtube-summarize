@@ -15,9 +15,9 @@ export function MainPage() {
   const [url, setUrl] = React.useState("");
 
   const generateSummary = async () => {
-    setIsLoading(true);
-
     try {
+      setIsLoading(true);
+
       const res = await fetch("/api/temp", {
         method: "POST",
         body: JSON.stringify({ url }),
@@ -30,13 +30,15 @@ export function MainPage() {
           );
           return;
         }
-        throw new Error("Failed to generate summary");
+
+        toast.error("Failed to generate summary");
+        return;
       }
 
       const { vId } = await res.json();
       router.push(`/temp/${vId}`);
     } catch (error) {
-      toast.error("Something went wrong generating the summary");
+      toast.error("Not possible to generate summary");
     } finally {
       setIsLoading(false);
     }
