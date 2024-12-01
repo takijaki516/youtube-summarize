@@ -1,3 +1,9 @@
+ARG AUTH_GOOGLE_ID
+ARG AUTH_GOOGLE_SECRET
+ARG OPENAI_API_KEY
+ARG DATABASE_URL
+
+
 FROM --platform=linux/amd64 node:20-alpine AS base
 # Add these lines to set up pnpm global
 ENV PNPM_HOME="/root/.local/share/pnpm"
@@ -20,6 +26,18 @@ RUN turbo prune @repo/web --docker
 
 
 FROM base AS installer
+ARG AUTH_GOOGLE_ID
+ENV AUTH_GOOGLE_ID=$AUTH_GOOGLE_ID
+
+ARG AUTH_GOOGLE_SECRET
+ENV AUTH_GOOGLE_SECRET=$AUTH_GOOGLE_SECRET
+
+ARG OPENAI_API_KEY
+ENV OPENAI_API_KEY=$OPENAI_API_KEY
+
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
 RUN apk update
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
