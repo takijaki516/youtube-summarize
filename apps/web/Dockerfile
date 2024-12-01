@@ -38,6 +38,9 @@ ENV OPENAI_API_KEY=$OPENAI_API_KEY
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 
+ARG AUTH_TRUST_HOST
+ENV AUTH_TRUST_HOST=$AUTH_TRUST_HOST
+
 RUN apk update
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
@@ -45,6 +48,10 @@ WORKDIR /app
 COPY --from=builder /app/out/json/ .
 RUN pnpm install
 # Copy full source
+
+# Set environment variables before running turbo build
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 COPY --from=builder /app/out/full/ .
 # build the project
 RUN turbo build
@@ -53,7 +60,13 @@ RUN turbo build
 # TODO use slim image
 FROM --platform=linux/amd64 node:20.15-bookworm-slim AS runner
 WORKDIR /app
+
+
 ENV NODE_ENV=production
+# When deploying your application behind a reverse proxy, you’ll need to set AUTH_TRUST_HOST equal to true
+ARG AUTH_TRUST_HOST
+ENV AUTH_TRUST_HOST=$AUTH_TRUST_HOST
+
 # Uncomment the following line in case you want to disable telemetry during runtime.
 ENV NEXT_TELEMETRY_DISABLED=1
 # Don't run production as root
