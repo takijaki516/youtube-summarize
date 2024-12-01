@@ -48,6 +48,7 @@ jobs:
             --build-arg AUTH_TRUST_HOST=true \
             -f apps/web/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -58,7 +59,7 @@ jobs:
           image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           cluster: ${{ env.ECS_CLUSTER }}
