@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { checkRateLimit, RateLimitError } from "@/lib/rate-limit";
 import ytdl from "ytdl-core";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 import { dbDrizzle, tempVideosSchema } from "@repo/database";
 import { embedTranscript } from "@/lib/llm/embedding";
@@ -26,14 +27,38 @@ export async function POST(req: Request) {
       return Response.json({ error: "URL is required" }, { status: 400 });
     }
 
-    const videoInfo = await ytdl.getInfo(url);
-    const videoTitle = videoInfo.videoDetails.title;
+    // NOTE: move this to env variable
+    const proxyHost = "gw.dataimpulse.com";
+    const proxyPort = 823;
+    const proxyLogin = "6761d7c7a193126692e4";
+    const proxyPassword = "6ed548246001ec5e";
+    const proxyUrl = `http://${proxyLogin}:${proxyPassword}@${proxyHost}:${proxyPort}`;
 
-    const transcripts = await getTranscript(url);
+    const httpProxyAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
+
+    const videoInfo = await ytdl.getBasicInfo(url, {
+      requestOptions: {
+        agent: proxyUrl ? httpProxyAgent : undefined,
+        headers: {
+          // Add common browser headers to look more legitimate
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.5",
+          Connection: "keep-alive",
+        },
+      },
+    });
+
+    const transcripts = await getTranscript(url, {
+      agent: httpProxyAgent,
+    });
     const mergedTranscript = mergeTranscript(transcripts);
     const tempSummaryText = await generateSummary(mergedTranscript);
 
     // TODO: change video ID to be uuid so we can use when storing embeddings which makes inserting video later with generated summary
+    const videoTitle = videoInfo.videoDetails.title;
     const insertedVideo = await dbDrizzle
       .insert(tempVideosSchema)
       .values({

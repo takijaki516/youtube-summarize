@@ -111,6 +111,9 @@ importers:
       framer-motion:
         specifier: ^11.5.6
         version: 11.11.17(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      https-proxy-agent:
+        specifier: ^7.0.5
+        version: 7.0.5
       lucide-react:
         specifier: ^0.379.0
         version: 0.379.0(react@18.3.1)
@@ -1709,6 +1712,10 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
+  agent-base@7.1.1:
+    resolution: {integrity: sha512-H0TSyFNDMomMNJQBn8wFV5YC/2eJ+VXECwOadZJT554xP6cODZHPX3H9QMQECxvrgiSOP1pHjy1sMWQVYJOUOA==}
+    engines: {node: '>= 14'}
+
   agentkeepalive@4.5.0:
     resolution: {integrity: sha512-5GG/5IbQQpC9FpkRGsSvZI5QYeSCzlJHdpBQntCsuTOxhKD8lqKhrleg2Yi7yvMIf82Ycmmqln9U8V9qwEiJew==}
     engines: {node: '>= 8.0.0'}
@@ -2396,6 +2403,10 @@ packages:
 
   html-void-elements@3.0.0:
     resolution: {integrity: sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg==}
+
+  https-proxy-agent@7.0.5:
+    resolution: {integrity: sha512-1e4Wqeblerz+tMKPIq2EMGiiWW1dIjZOksyHWSUm1rmuvw/how9hBHZ38lAGj5ID4Ik6EdkOw7NmWPy6LAwalw==}
+    engines: {node: '>= 14'}
 
   human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
@@ -5152,6 +5163,12 @@ snapshots:
 
   acorn@8.14.0: {}
 
+  agent-base@7.1.1:
+    dependencies:
+      debug: 4.3.7
+    transitivePeerDependencies:
+      - supports-color
+
   agentkeepalive@4.5.0:
     dependencies:
       humanize-ms: 1.2.1
@@ -5824,6 +5841,13 @@ snapshots:
   html-url-attributes@3.0.1: {}
 
   html-void-elements@3.0.0: {}
+
+  https-proxy-agent@7.0.5:
+    dependencies:
+      agent-base: 7.1.1
+      debug: 4.3.7
+    transitivePeerDependencies:
+      - supports-color
 
   human-signals@2.1.0: {}
 

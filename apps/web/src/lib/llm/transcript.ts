@@ -1,12 +1,22 @@
-import { YoutubeTranscript } from "youtube-transcript";
 import { eq } from "drizzle-orm";
 
+import { YoutubeTranscript } from "../youtube-transcript";
 import { dbDrizzle, videosSchema, tempVideosSchema } from "@repo/database";
 import { TranscriptSegment } from "../../types/types";
 import { similarText } from "./embedding";
 
-export async function getTranscript(url: string): Promise<TranscriptSegment[]> {
-  const transcripts = await YoutubeTranscript.fetchTranscript(url);
+interface GetTranscriptConfig {
+  agent?: {};
+}
+
+export async function getTranscript(
+  url: string,
+  config?: GetTranscriptConfig,
+): Promise<TranscriptSegment[]> {
+  const transcripts = await YoutubeTranscript.fetchTranscript(url, {
+    agent: config?.agent,
+  });
+
   let cur = 0;
 
   // NOTE: how to evaluate if this is a good chunk size?
