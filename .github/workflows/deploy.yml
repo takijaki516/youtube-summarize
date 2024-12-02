@@ -7,8 +7,8 @@ on:
 env:
   AWS_REGION: ap-northeast-2
   ECR_REPOSITORY: youtube-summarize
-  ECS_CLUSTER: EcsFargateStack-YoutubeSummarizeClusterBC0D1F1B-khA6AjSnynEj
-  ECS_SERVICE: EcsFargateStack-YoutubeSummarizeServiceEB825544-FXm4OipBukvl
+  ECS_CLUSTER: EcsFargateStack-YoutubeSummarizeClusterBC0D1F1B-Znh9li4OBKuc
+  ECS_SERVICE: EcsFargateStack-YoutubeSummarizeServiceEB825544-XzShAUkvoKLu
   ECS_TASK_DEFINITION: .aws/task-definition.json
   CONTAINER_NAME: youtube-summarize
 
