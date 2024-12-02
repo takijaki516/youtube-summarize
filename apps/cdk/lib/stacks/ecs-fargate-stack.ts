@@ -159,7 +159,6 @@ export class EcsFargateStack extends cdk.Stack {
             taskRole: taskRole,
             executionRole: executionRole,
           },
-
           // healthCheck: {
           //   // simple TCP health check
           //   command: ["CMD-SHELL", "nc", "-z", "localhost", "3000"],

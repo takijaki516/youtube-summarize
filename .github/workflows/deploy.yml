@@ -41,12 +41,13 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build \
+            --build-arg OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+            --build-arg AUTH_SECRET=${{ secrets.AUTH_SECRET }} \
             --build-arg AUTH_GOOGLE_ID=${{ secrets.AUTH_GOOGLE_ID }} \
             --build-arg AUTH_GOOGLE_SECRET=${{ secrets.AUTH_GOOGLE_SECRET }} \
-            --build-arg OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+            --build-arg AUTH_TRUST_HOST=true \
             --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} \
             --build-arg PROXY_URL=${{ secrets.PROXY_URL }} \
-            --build-arg AUTH_TRUST_HOST=true \
             -f apps/web/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT

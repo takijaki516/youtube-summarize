@@ -4,13 +4,21 @@ services:
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+        AUTH_GOOGLE_ID: ${AUTH_GOOGLE_ID}
+        AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET}
+        AUTH_SECRET: ${AUTH_SECRET}
+        OPENAI_API_KEY: ${OPENAI_API_KEY}
+        AUTH_TRUST_HOST: ${AUTH_TRUST_HOST}
+        PROXY_URL: ${PROXY_URL}
     image: youtube-summarize-nextjs
     ports:
       - 3000:3000
     env_file:
       - .env
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@next_db:5432/youtube_summarize
+      - DATABASE_URL=${DATABASE_URL}
       - AUTH_URL=http://localhost:3000/api/auth
     depends_on:
       next_db:
@@ -24,7 +32,7 @@ services:
       dockerfile: ./packages/database/Dockerfile
     restart: "no"
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@next_db:5432/youtube_summarize
+      - DATABASE_URL=${DATABASE_URL}
     depends_on:
       next_db:
         condition: service_healthy
