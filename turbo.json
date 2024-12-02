@@ -5,7 +5,8 @@
     "AUTH_GOOGLE_SECRET",
     "OPENAI_API_KEY",
     "DATABASE_URL",
-    "AUTH_TRUST_HOST"
+    "AUTH_TRUST_HOST",
+    "PROXY_URL"
   ],
   "tasks": {
     "build": {
