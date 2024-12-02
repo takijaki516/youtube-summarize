@@ -11,6 +11,7 @@ import {
   mergeTranscript,
 } from "@/lib/llm/transcript";
 import { generateSummary } from "@/lib/llm/summarize";
+import { env } from "@/lib/env";
 
 // TODO: implement rate limiting
 export async function POST(req: Request) {
@@ -27,13 +28,7 @@ export async function POST(req: Request) {
       return Response.json({ error: "URL is required" }, { status: 400 });
     }
 
-    // NOTE: move this to env variable
-    const proxyHost = "gw.dataimpulse.com";
-    const proxyPort = 823;
-    const proxyLogin = "6761d7c7a193126692e4";
-    const proxyPassword = "6ed548246001ec5e";
-    const proxyUrl = `http://${proxyLogin}:${proxyPassword}@${proxyHost}:${proxyPort}`;
-
+    const proxyUrl = env.PROXY_URL;
     const httpProxyAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
 
     const videoInfo = await ytdl.getBasicInfo(url, {

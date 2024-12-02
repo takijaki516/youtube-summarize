@@ -60,6 +60,12 @@ export class EcsFargateStack extends cdk.Stack {
       }
     );
 
+    const proxyUrlSecret = new secretsManager.Secret(this, "ProxyUrlSecret", {
+      secretStringValue: cdk.SecretValue.unsafePlainText(
+        process.env.PROXY_URL!
+      ),
+    });
+
     // VPC
     const vpc = props.vpc;
 
@@ -148,6 +154,7 @@ export class EcsFargateStack extends cdk.Stack {
               AUTH_GOOGLE_SECRET:
                 ecs.Secret.fromSecretsManager(authGoogleSecret),
               DATABASE_URL: ecs.Secret.fromSecretsManager(databaseUrlSecret),
+              PROXY_URL: ecs.Secret.fromSecretsManager(proxyUrlSecret),
             },
             taskRole: taskRole,
             executionRole: executionRole,

@@ -1,4 +1,6 @@
 import ytdl from "ytdl-core";
+import { eq } from "drizzle-orm";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 import { auth } from "@/auth";
 import { dbDrizzle, videosSchema, userRateLimitsSchema } from "@repo/database";
@@ -9,7 +11,7 @@ import {
   mergeTranscript,
 } from "@/lib/llm/transcript";
 import { generateSummary } from "@/lib/llm/summarize";
-import { eq, gt } from "drizzle-orm";
+import { env } from "@/lib/env";
 
 export const POST = auth(async function POST(req) {
   if (!req.auth) {
@@ -51,10 +53,27 @@ export const POST = auth(async function POST(req) {
 
   const { url } = await req.json();
 
-  const videoInfo = await ytdl.getInfo(url);
-  const videoTitle = videoInfo.videoDetails.title;
+  const proxyUrl = env.PROXY_URL;
+  const httpProxyAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
 
-  const transcripts = await getTranscript(url);
+  const videoInfo = await ytdl.getBasicInfo(url, {
+    requestOptions: {
+      agent: proxyUrl ? httpProxyAgent : undefined,
+      headers: {
+        // Add common browser headers to look more legitimate
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        Connection: "keep-alive",
+      },
+    },
+  });
+  const videoTitle = videoInfo.videoDetails.title;
+  const transcripts = await getTranscript(url, {
+    agent: httpProxyAgent,
+  });
   const mergedTranscript = mergeTranscript(transcripts);
   const summaryText = await generateSummary(mergedTranscript);
 

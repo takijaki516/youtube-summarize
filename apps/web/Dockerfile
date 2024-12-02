@@ -2,6 +2,7 @@ ARG AUTH_GOOGLE_ID
 ARG AUTH_GOOGLE_SECRET
 ARG OPENAI_API_KEY
 ARG DATABASE_URL
+ARG PROXY_URL
 
 
 FROM --platform=linux/amd64 node:20-alpine AS base
@@ -41,6 +42,9 @@ ENV DATABASE_URL=$DATABASE_URL
 ARG AUTH_TRUST_HOST
 ENV AUTH_TRUST_HOST=$AUTH_TRUST_HOST
 
+ARG PROXY_URL
+ENV PROXY_URL=$PROXY_URL
+
 RUN apk update
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
@@ -61,11 +65,8 @@ RUN turbo build
 FROM --platform=linux/amd64 node:20.15-bookworm-slim AS runner
 WORKDIR /app
 
-
 ENV NODE_ENV=production
 # When deploying your application behind a reverse proxy, you’ll need to set AUTH_TRUST_HOST equal to true
-ARG AUTH_TRUST_HOST
-ENV AUTH_TRUST_HOST=$AUTH_TRUST_HOST
 
 # Uncomment the following line in case you want to disable telemetry during runtime.
 ENV NEXT_TELEMETRY_DISABLED=1

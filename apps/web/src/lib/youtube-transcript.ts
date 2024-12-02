@@ -1,3 +1,6 @@
+import type { Agent } from "https";
+import miniget from "miniget";
+
 const RE_YOUTUBE =
   /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
 const USER_AGENT =
@@ -49,7 +52,7 @@ export class YoutubeTranscriptNotAvailableLanguageError extends YoutubeTranscrip
 
 export interface TranscriptConfig {
   lang?: string;
-  agent?: {};
+  agent?: Agent;
 }
 
 export interface TranscriptResponse {
@@ -73,14 +76,14 @@ export class YoutubeTranscript {
     config?: TranscriptConfig,
   ): Promise<TranscriptResponse[]> {
     const identifier = this.retrieveVideoId(videoId);
-    const videoPageResponse = await fetch(
+    const videoPageResponse = await miniget(
       `https://www.youtube.com/watch?v=${identifier}`,
       {
         headers: {
           ...(config?.lang && { "Accept-Language": config.lang }),
           "User-Agent": USER_AGENT,
         },
-        ...(config?.agent && { agent: config.agent }),
+        agent: config?.agent,
       },
     );
     const videoPageBody = await videoPageResponse.text();
@@ -91,9 +94,11 @@ export class YoutubeTranscript {
       if (videoPageBody.includes('class="g-recaptcha"')) {
         throw new YoutubeTranscriptTooManyRequestError();
       }
+
       if (!videoPageBody.includes('"playabilityStatus":')) {
         throw new YoutubeTranscriptVideoUnavailableError(videoId);
       }
+
       throw new YoutubeTranscriptDisabledError(videoId);
     }
 
@@ -140,16 +145,14 @@ export class YoutubeTranscript {
         : captions.captionTracks[0]
     ).baseUrl;
 
-    const transcriptResponse = await fetch(transcriptURL, {
+    const transcriptResponse = await miniget(transcriptURL, {
       headers: {
         ...(config?.lang && { "Accept-Language": config.lang }),
         "User-Agent": USER_AGENT,
       },
-      ...(config?.agent && { agent: config.agent }),
+      agent: config?.agent,
     });
-    if (!transcriptResponse.ok) {
-      throw new YoutubeTranscriptNotAvailableError(videoId);
-    }
+
     const transcriptBody = await transcriptResponse.text();
     const results = [...transcriptBody.matchAll(RE_XML_TRANSCRIPT)];
 

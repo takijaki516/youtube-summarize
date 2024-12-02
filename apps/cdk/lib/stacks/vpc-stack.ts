@@ -11,7 +11,7 @@ export class VpcStack extends cdk.Stack {
 
     this.vpc = new ec2.Vpc(this, "YoutubeSummarizeVPC", {
       maxAzs: 2,
-      natGateways: 1,
+      natGateways: 1, // single NAT gateway for both private subnets, since NAT gateway is expensive
     });
   }
 }

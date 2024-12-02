@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import type { Agent } from "https";
 
 import { YoutubeTranscript } from "../youtube-transcript";
 import { dbDrizzle, videosSchema, tempVideosSchema } from "@repo/database";
@@ -6,7 +7,7 @@ import { TranscriptSegment } from "../../types/types";
 import { similarText } from "./embedding";
 
 interface GetTranscriptConfig {
-  agent?: {};
+  agent?: Agent;
 }
 
 export async function getTranscript(
