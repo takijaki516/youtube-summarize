@@ -8,7 +8,6 @@ export class RateLimitError extends Error {
   }
 }
 
-// REVIEW:
 export async function checkRateLimit(
   key: string,
   limit: number,
@@ -49,8 +48,8 @@ export async function checkRateLimit(
     if (error instanceof RateLimitError) {
       throw error;
     }
+
     console.error("Rate limit check error:", error);
-    // Don't block the request if rate limiting fails
-    return;
+    throw error;
   }
 }

@@ -54,6 +54,7 @@ export async function POST(req: Request) {
 
     // TODO: change video ID to be uuid so we can use when storing embeddings which makes inserting video later with generated summary
     const videoTitle = videoInfo.videoDetails.title;
+
     const insertedVideo = await dbDrizzle
       .insert(tempVideosSchema)
       .values({
@@ -66,6 +67,7 @@ export async function POST(req: Request) {
       });
 
     const videoId = insertedVideo[0]?.id;
+
     if (!videoId) {
       throw new Error("Video ID is undefined");
     }
