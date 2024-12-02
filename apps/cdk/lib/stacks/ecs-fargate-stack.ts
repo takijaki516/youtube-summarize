@@ -8,6 +8,7 @@ import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as ecs_patterns from "aws-cdk-lib/aws-ecs-patterns";
 import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as secretsManager from "aws-cdk-lib/aws-secretsmanager";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 interface EcsFargateStackProps extends cdk.StackProps {
   vpc: ec2.Vpc;
@@ -82,6 +83,37 @@ export class EcsFargateStack extends cdk.Stack {
       }
     );
 
+    // create task role
+    const executionRole = new iam.Role(
+      this,
+      "YoutubeSummarizeTaskExecutionRole",
+      {
+        assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+        managedPolicies: [
+          iam.ManagedPolicy.fromAwsManagedPolicyName(
+            "service-role/AmazonECSTaskExecutionRolePolicy"
+          ),
+        ],
+      }
+    );
+
+    const taskRole = new iam.Role(this, "YoutubeSummarizeTaskRole", {
+      assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+    });
+
+    taskRole.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ["secretsmanager:GetSecretValue"],
+        resources: [
+          openAiSecret.secretArn,
+          authSecret.secretArn,
+          authGoogleIdSecret.secretArn,
+          authGoogleSecret.secretArn,
+          databaseUrlSecret.secretArn,
+        ],
+      })
+    );
+
     // Add ECR repository
     const repository = new ecr.Repository(this, "YoutubeSummarizeRepo", {
       repositoryName: "youtube-summarize",
@@ -117,7 +149,10 @@ export class EcsFargateStack extends cdk.Stack {
                 ecs.Secret.fromSecretsManager(authGoogleSecret),
               DATABASE_URL: ecs.Secret.fromSecretsManager(databaseUrlSecret),
             },
+            taskRole: taskRole,
+            executionRole: executionRole,
           },
+
           // healthCheck: {
           //   // simple TCP health check
           //   command: ["CMD-SHELL", "nc", "-z", "localhost", "3000"],
