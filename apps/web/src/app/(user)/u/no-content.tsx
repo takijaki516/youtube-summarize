@@ -50,7 +50,7 @@ export function NoContent() {
 
   return (
     <>
-      <div className="max-w-md text-4xl md:text-5xl lg:text-6xl">
+      <div className="mt-20 max-w-md text-4xl md:text-5xl lg:text-6xl">
         <h1 className="text-center text-foreground">Summarize Youtube video</h1>
       </div>
 

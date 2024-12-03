@@ -1,4 +1,3 @@
-import type { Agent } from "https";
 import miniget from "miniget";
 
 const RE_YOUTUBE =
@@ -52,7 +51,6 @@ export class YoutubeTranscriptNotAvailableLanguageError extends YoutubeTranscrip
 
 export interface TranscriptConfig {
   lang?: string;
-  agent?: Agent;
 }
 
 export interface TranscriptResponse {
@@ -83,7 +81,6 @@ export class YoutubeTranscript {
           ...(config?.lang && { "Accept-Language": config.lang }),
           "User-Agent": USER_AGENT,
         },
-        agent: config?.agent,
       },
     );
     const videoPageBody = await videoPageResponse.text();
@@ -150,7 +147,6 @@ export class YoutubeTranscript {
         ...(config?.lang && { "Accept-Language": config.lang }),
         "User-Agent": USER_AGENT,
       },
-      agent: config?.agent,
     });
 
     const transcriptBody = await transcriptResponse.text();

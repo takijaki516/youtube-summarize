@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import { checkRateLimit, RateLimitError } from "@/lib/rate-limit";
 import ytdl from "ytdl-core";
-import { HttpsProxyAgent } from "https-proxy-agent";
 
 import { dbDrizzle, tempVideosSchema } from "@repo/database";
 import { embedTranscript } from "@/lib/llm/embedding";
@@ -28,12 +27,8 @@ export async function POST(req: Request) {
       return Response.json({ error: "URL is required" }, { status: 400 });
     }
 
-    const proxyUrl = env.PROXY_URL;
-    const httpProxyAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
-
     const videoInfo = await ytdl.getBasicInfo(url, {
       requestOptions: {
-        agent: proxyUrl ? httpProxyAgent : undefined,
         headers: {
           // Add common browser headers to look more legitimate
           "User-Agent":
@@ -46,9 +41,7 @@ export async function POST(req: Request) {
       },
     });
 
-    const transcripts = await getTranscript(url, {
-      agent: httpProxyAgent,
-    });
+    const transcripts = await getTranscript(url);
     const mergedTranscript = mergeTranscript(transcripts);
     const tempSummaryText = await generateSummary(mergedTranscript);
 

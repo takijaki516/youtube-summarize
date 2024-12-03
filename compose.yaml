@@ -1,6 +1,7 @@
 services:
   next_web:
     container_name: next_web
+    image: youtube-summarize-nextjs
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
@@ -11,10 +12,8 @@ services:
         AUTH_SECRET: ${AUTH_SECRET}
         OPENAI_API_KEY: ${OPENAI_API_KEY}
         AUTH_TRUST_HOST: ${AUTH_TRUST_HOST}
-        PROXY_URL: ${PROXY_URL}
-    image: youtube-summarize-nextjs
     ports:
-      - 3000:3000
+      - 5566:3000
     env_file:
       - .env
     environment:
@@ -27,6 +26,8 @@ services:
         condition: service_completed_successfully # Waits for exit code 0
 
   migrations:
+    container_name: next_migrations
+    image: youtube-summarize-migrations
     build:
       context: .
       dockerfile: ./packages/database/Dockerfile
@@ -66,5 +67,21 @@ services:
       timeout: 5s
       retries: 5
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: next_summarize_pgadmin4_container
+    restart: always
+    ports:
+      - "8899:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: password
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      next_db:
+        condition: service_healthy
+
 volumes:
   youtube_summarize_postgres_data:
+  pgadmin-data:

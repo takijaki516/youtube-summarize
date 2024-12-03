@@ -19,14 +19,18 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
         rehypePlugins={[rehypeRaw]}
         components={{
           a({ href, children }) {
-            const hhmmss = (children as string).slice(
-              (children as string).length - 8,
-            );
-            // hhmmss to seconds
-            const [hours, minutes, seconds] = hhmmss.split(":").map(Number);
-            // TODO: handle undefined
-            const timestamp =
-              (hours ?? 0) * 3600 + (minutes ?? 0) * 60 + (seconds ?? 0);
+            if (!href) {
+              return null;
+            }
+
+            const timeMatch = href.match(/[?&]t=(\d+)s/);
+            const seconds = timeMatch?.[1];
+
+            if (!seconds) {
+              return null;
+            }
+
+            const timestamp = parseInt(seconds);
 
             return (
               <span

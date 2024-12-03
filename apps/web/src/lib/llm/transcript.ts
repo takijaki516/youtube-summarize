@@ -1,22 +1,12 @@
 import { eq } from "drizzle-orm";
-import type { Agent } from "https";
 
 import { YoutubeTranscript } from "../youtube-transcript";
 import { dbDrizzle, videosSchema, tempVideosSchema } from "@repo/database";
 import { TranscriptSegment } from "../../types/types";
 import { similarText } from "./embedding";
 
-interface GetTranscriptConfig {
-  agent?: Agent;
-}
-
-export async function getTranscript(
-  url: string,
-  config?: GetTranscriptConfig,
-): Promise<TranscriptSegment[]> {
-  const transcripts = await YoutubeTranscript.fetchTranscript(url, {
-    agent: config?.agent,
-  });
+export async function getTranscript(url: string): Promise<TranscriptSegment[]> {
+  const transcripts = await YoutubeTranscript.fetchTranscript(url);
 
   let cur = 0;
 
@@ -119,9 +109,9 @@ async function processPlaceholder(
   url: string,
   { videoId, userId, isTemp }: ProcessPlaceholderOptions,
 ) {
-  // remove the timestamp from the url
-  let sanitizedURL = url.replace(/&t=\d+s/, "");
+  let sanitizedURL = url.replace(/[?&]t=\d+s?/, "");
 
+  // NOTE: isTemp is for user
   if (isTemp) {
     if (placeholder.startsWith("<HYPERLINK:")) {
       const text = placeholder.slice(11, -1);
@@ -130,9 +120,7 @@ async function processPlaceholder(
       const timestamp = result.start;
       const formattedTime = secondsToHMS(timestamp);
 
-      const hyperlink = `${sanitizedURL}&t=${timestamp}s`;
-
-      return `[YOUTUBE VIDEO: ${formattedTime}](${hyperlink})`;
+      return `[YOUTUBE VIDEO: ${formattedTime}](${sanitizedURL}&t=${timestamp}s)`;
     } else {
       return placeholder;
     }
@@ -144,9 +132,7 @@ async function processPlaceholder(
       const timestamp = result.start;
       const formattedTime = secondsToHMS(timestamp);
 
-      const hyperlink = `${sanitizedURL}&t=${timestamp}s`;
-
-      return `[YOUTUBE VIDEO: ${formattedTime}](${hyperlink})`;
+      return `[YOUTUBE VIDEO: ${formattedTime}](${sanitizedURL}&t=${timestamp}s)`;
     } else {
       return placeholder;
     }
