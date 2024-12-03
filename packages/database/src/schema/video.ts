@@ -1,16 +1,10 @@
-import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
-
-import { usersSchema } from "./auth";
+import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const videosSchema = pgTable("video", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey(),
   title: text("title").notNull(),
   url: text("url").notNull(),
   summary: text("summary").notNull(),
-  userId: text("userId")
-    .notNull()
-    .references(() => usersSchema.id, { onDelete: "cascade" }),
-
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });

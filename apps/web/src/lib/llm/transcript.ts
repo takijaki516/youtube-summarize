@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 
 import { YoutubeTranscript } from "../youtube-transcript";
-import { dbDrizzle, videosSchema, tempVideosSchema } from "@repo/database";
-import { TranscriptSegment } from "../../types/types";
+import { dbDrizzle, videosSchema } from "@repo/database";
+import { TranscriptSegment } from "@/types/types";
 import { similarText } from "./embedding";
 
 export async function getTranscript(url: string): Promise<TranscriptSegment[]> {
@@ -34,108 +34,53 @@ export function mergeTranscript(transcripts: TranscriptSegment[]): string {
   return mergedTranscript;
 }
 
-type GenerateMarkdownOptions =
-  | {
-      videoId: number;
-      isTemp: true;
-      userId?: never;
-    }
-  | {
-      videoId: number;
-      userId: string;
-      isTemp?: false;
-    };
+type GenerateMarkdownOptions = {
+  videoId: string;
+};
 
 export async function generateMarkdown(
-  transcript: string,
+  summary: string,
   url: string,
-  { videoId, isTemp, userId }: GenerateMarkdownOptions,
-) {
-  const placeholders = transcript.match(/<.+?>/g);
+  { videoId }: GenerateMarkdownOptions,
+): Promise<string> {
+  const placeholders = summary.match(/<.+?>/g);
 
   if (!placeholders) {
-    return;
+    return summary;
   }
 
-  if (isTemp) {
-    for (const placeholder of placeholders) {
-      const replacementText = await processPlaceholder(placeholder, url, {
-        videoId,
-        isTemp,
-      });
+  for (const placeholder of placeholders) {
+    const replacementText = await processPlaceholder(placeholder, url, {
+      videoId,
+    });
 
-      transcript = transcript.replace(placeholder, replacementText);
-    }
-
-    await dbDrizzle
-      .update(tempVideosSchema)
-      .set({
-        summary: transcript,
-      })
-      .where(eq(tempVideosSchema.id, videoId));
-  } else {
-    for (const placeholder of placeholders) {
-      const replacementText = await processPlaceholder(placeholder, url, {
-        videoId,
-        userId,
-      });
-
-      transcript = transcript.replace(placeholder, replacementText);
-    }
-
-    await dbDrizzle
-      .update(videosSchema)
-      .set({
-        summary: transcript,
-      })
-      .where(eq(videosSchema.id, videoId));
+    summary = summary.replace(placeholder, replacementText);
   }
+
+  return summary;
 }
 
-type ProcessPlaceholderOptions =
-  | {
-      videoId: number;
-      isTemp: true;
-      userId?: never;
-    }
-  | {
-      videoId: number;
-      userId: string;
-      isTemp?: false;
-    };
+type ProcessPlaceholderOptions = {
+  videoId: string;
+};
 
 async function processPlaceholder(
   placeholder: string,
   url: string,
-  { videoId, userId, isTemp }: ProcessPlaceholderOptions,
+  { videoId }: ProcessPlaceholderOptions,
 ) {
   let sanitizedURL = url.replace(/[?&]t=\d+s?/, "");
 
-  // NOTE: isTemp is for user
-  if (isTemp) {
-    if (placeholder.startsWith("<HYPERLINK:")) {
-      const text = placeholder.slice(11, -1);
-      const result = await similarText(text, { videoId, isTemp });
+  if (placeholder.startsWith("<HYPERLINK:")) {
+    const text = placeholder.slice(11, -1);
+    const result = await similarText(text, { videoId });
 
-      const timestamp = result.start;
-      const formattedTime = secondsToHMS(timestamp);
+    const timestamp = result.start;
+    const formattedTime = secondsToHMS(timestamp);
 
-      return `[YOUTUBE VIDEO: ${formattedTime}](${sanitizedURL}&t=${timestamp}s)`;
-    } else {
-      return placeholder;
-    }
+    return `[YOUTUBE VIDEO: ${formattedTime}](${sanitizedURL}&t=${timestamp}s)`;
   } else {
-    if (placeholder.startsWith("<HYPERLINK:")) {
-      const text = placeholder.slice(11, -1);
-      const result = await similarText(text, { videoId, userId });
-
-      const timestamp = result.start;
-      const formattedTime = secondsToHMS(timestamp);
-
-      return `[YOUTUBE VIDEO: ${formattedTime}](${sanitizedURL}&t=${timestamp}s)`;
-    } else {
-      return placeholder;
-    }
+    return placeholder;
   }
 }
 

@@ -5,21 +5,19 @@ import {
   integer,
   serial,
   timestamp,
+  uuid,
 } from "drizzle-orm/pg-core";
 
-import { usersSchema } from "./auth";
 import { videosSchema } from "./video";
 
 export const embeddingsSchema = pgTable("embedding", {
   id: serial("id").primaryKey(),
-  embedding: vector("embedding", { dimensions: 1536 }),
-  text: text("text"),
-  lang: text("lang"),
-  start: integer("start"),
-  userId: text("userId")
-    .notNull()
-    .references(() => usersSchema.id, { onDelete: "cascade" }),
-  videoId: integer("videoId")
+  embedding: vector("embedding", { dimensions: 1536 }).notNull(),
+  text: text("text").notNull(),
+  // NOTE:
+  lang: text("lang").notNull(),
+  start: integer("start").notNull(),
+  videoId: uuid("videoId")
     .notNull()
     .references(() => videosSchema.id, { onDelete: "cascade" }),
 

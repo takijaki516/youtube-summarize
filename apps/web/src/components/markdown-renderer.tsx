@@ -4,7 +4,7 @@ import * as React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 
-import { useYouTubeStore } from "../lib/store/use-youtube-store";
+import { useYouTubeStore } from "@/lib/store/use-youtube-store";
 
 type MarkdownRendererProps = {
   content: string;

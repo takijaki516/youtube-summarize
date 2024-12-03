@@ -1,9 +1,7 @@
 import { desc, eq, sql } from "drizzle-orm";
-
 import { dbDrizzle, videosSchema } from "@repo/database";
-import { auth } from "@/auth";
 
-export const GET = auth(async function GET(request: Request) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get("page") ?? "1");
   const limit = parseInt(searchParams.get("limit") ?? "10");
@@ -29,12 +27,25 @@ export const GET = auth(async function GET(request: Request) {
     nextPage: offset + limit < totalCount ? page + 1 : null,
     totalCount,
   });
-});
+}
 
-export const DELETE = auth(async function DELETE(request: Request) {
+export async function DELETE(request: Request) {
   const { id } = await request.json();
 
-  await dbDrizzle.delete(videosSchema).where(eq(videosSchema.id, +id));
+  if (!id) {
+    return Response.json({ message: "Invalid request" }, { status: 400 });
+  }
 
-  return Response.json({ message: "Video deleted successfully" });
-});
+  try {
+    await dbDrizzle.delete(videosSchema).where(eq(videosSchema.id, id));
+
+    return Response.json({ message: "Video deleted successfully" });
+  } catch (error) {
+    console.log("🚀 ~ file: route.ts:44 ~ DELETE ~ error:", error);
+
+    return Response.json(
+      { message: "Failed to delete video" },
+      { status: 500 },
+    );
+  }
+}

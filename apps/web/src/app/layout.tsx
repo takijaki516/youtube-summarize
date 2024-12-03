@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import "@/app/styles/globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
-import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
+import { TailwindIndicator } from "@/components/tailwind-indicator";
+import { QueryProviders } from "@/components/query-provider";
+import { Sidebar } from "@/components/sidebar";
 
 export const metadata: Metadata = {
   title: "vercel ai video summarizer",
@@ -16,14 +19,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("flex h-dvh flex-col")}>
+      <body className={"h-dvh"}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <QueryProviders>
+            <main className="flex h-full w-full">
+              <Sidebar />
+              {children}
+              <Toaster richColors={true} />
+            </main>
+
+            <Toaster richColors={true} />
+            <TailwindIndicator />
+          </QueryProviders>
         </ThemeProvider>
       </body>
     </html>

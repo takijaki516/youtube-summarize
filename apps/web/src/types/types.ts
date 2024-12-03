@@ -1,14 +1,3 @@
-import "next-auth/jwt";
-import type { User } from "next-auth";
-
-declare module "next-auth" {
-  export interface Session {
-    user: User & {
-      id: string;
-    };
-  }
-}
-
 // Transcript object structure
 export type TranscriptSegment = {
   text: string;

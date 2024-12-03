@@ -1,3 +1,4 @@
+import { OpenAIError } from "./llm-error";
 import { openai } from "./openai";
 
 const SYSTEMPROMPT = `You are an expert at summarizing and structuring content into a comprehensive guide.
@@ -73,6 +74,6 @@ export async function generateSummary(transcript: string): Promise<string> {
     return generatedSummary;
   } catch (error) {
     console.error("Error generating summary:", error);
-    throw new Error("Failed to generate summary");
+    throw new OpenAIError("Failed to generate summary");
   }
 }
