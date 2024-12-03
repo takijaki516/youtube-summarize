@@ -3,24 +3,53 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Send, RotateCw } from "lucide-react";
+import { Send, RotateCw, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useLLMStore } from "@/lib/store/llm-store";
+import { TranscriptRequestSchema } from "@/types/types";
 
 export function WelcomePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [url, setUrl] = React.useState("");
+  const [inputUrl, setInputUrl] = React.useState("");
+  const { currentLLM, currentEmbedding } = useLLMStore();
 
   const generateSummary = async () => {
     try {
       setIsLoading(true);
 
+      const validated = TranscriptRequestSchema.safeParse({
+        url: inputUrl,
+        model: currentLLM?.model,
+        provider: currentLLM?.provider,
+        embeddingModel: currentEmbedding?.model,
+        embeddingProvider: currentEmbedding?.provider,
+      });
+
+      // TODO: better error
+      if (!validated.success) {
+        toast.error(`Provide URL, API Key, Embedding Settings`);
+        return;
+      }
+
+      const { url, model, provider, embeddingModel, embeddingProvider } =
+        validated.data;
+
       const res = await fetch("/api/transcript", {
+        headers: {
+          "Content-Type": "application/json",
+        },
         method: "POST",
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({
+          url,
+          model,
+          provider,
+          embeddingModel,
+          embeddingProvider,
+        }),
       });
 
       if (!res.ok) {
@@ -74,8 +103,8 @@ export function WelcomePage() {
                 id="url"
                 placeholder="youtube url"
                 className="w-full"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                value={inputUrl}
+                onChange={(e) => setInputUrl(e.target.value)}
               />
 
               <Button
@@ -86,6 +115,13 @@ export function WelcomePage() {
               >
                 {isLoading ? <RotateCw className="animate-spin" /> : <Send />}
               </Button>
+
+              {isLoading && (
+                <Button>
+                  <X />
+                  Cancel
+                </Button>
+              )}
             </motion.div>
           </div>
         </div>

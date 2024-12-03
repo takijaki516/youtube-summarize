@@ -1,20 +1,28 @@
 import { sql } from "drizzle-orm";
 import pgvector from "pgvector";
+import { type EmbeddingModel, embed } from "ai";
 
 import { dbDrizzle, embeddingsSchema } from "@repo/database";
 import { SimilarSearchResult, TranscriptSegment } from "@/types/types";
-import { openai } from "./openai";
 import { OpenAIError } from "./llm-error";
 
+interface GetEmbeddingOptions {
+  text: string;
+  embeddingModel: EmbeddingModel<string>;
+}
+
 // Function to get embedding from OpenAI
-async function getEmbedding(text: string): Promise<number[]> {
+async function getEmbedding({
+  text,
+  embeddingModel,
+}: GetEmbeddingOptions): Promise<number[]> {
   try {
-    const response = await openai.embeddings.create({
-      model: "text-embedding-3-small",
-      input: text,
+    const { embedding } = await embed({
+      model: embeddingModel,
+      value: text,
     });
 
-    return response.data[0]?.embedding ?? [];
+    return embedding;
   } catch (error) {
     throw new OpenAIError("Failed to get embedding");
   }
@@ -42,14 +50,20 @@ async function storeEmbedding(
 
 type EmbedTranscriptOptions = {
   videoId: string;
+  transcript: TranscriptSegment[];
+  embeddingModel: EmbeddingModel<string>;
 };
 
-export async function embedTranscript(
-  transcript: TranscriptSegment[],
-  { videoId }: EmbedTranscriptOptions,
-): Promise<void> {
+export async function embedTranscript({
+  embeddingModel,
+  transcript,
+  videoId,
+}: EmbedTranscriptOptions): Promise<void> {
   for (const segment of transcript) {
-    const embedding = await getEmbedding(segment.text);
+    const embedding = await getEmbedding({
+      text: segment.text,
+      embeddingModel: embeddingModel,
+    });
 
     await storeEmbedding(segment, embedding, { videoId });
   }
@@ -57,13 +71,19 @@ export async function embedTranscript(
 
 type SimilarTextOptions = {
   videoId: string;
+  embeddingModel: EmbeddingModel<string>;
+  text: string;
 };
 
-export async function similarText(
-  text: string,
-  { videoId }: SimilarTextOptions,
-): Promise<SimilarSearchResult> {
-  const queryEmbedding = await getEmbedding(text);
+export async function similarText({
+  embeddingModel,
+  text,
+  videoId,
+}: SimilarTextOptions): Promise<SimilarSearchResult> {
+  const queryEmbedding = await getEmbedding({
+    text: text,
+    embeddingModel: embeddingModel,
+  });
 
   const pgQueryEmbedding = pgvector.toSql(queryEmbedding);
 

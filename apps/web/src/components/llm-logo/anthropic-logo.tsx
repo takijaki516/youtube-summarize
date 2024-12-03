@@ -1,4 +1,4 @@
-export function ClaudeLogo() {
+export function AnthropicLogo() {
   return (
     <svg
       height="1em"

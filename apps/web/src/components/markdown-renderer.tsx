@@ -14,7 +14,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   const { setStartTime } = useYouTubeStore();
 
   return (
-    <div className="prose h-full max-w-none overflow-y-auto p-10 dark:prose-invert">
+    <div className="prose h-full max-w-none p-10 dark:prose-invert">
       <ReactMarkdown
         rehypePlugins={[rehypeRaw]}
         components={{

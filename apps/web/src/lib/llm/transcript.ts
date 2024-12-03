@@ -1,7 +1,6 @@
-import { eq } from "drizzle-orm";
+import { type EmbeddingModel } from "ai";
 
 import { YoutubeTranscript } from "../youtube-transcript";
-import { dbDrizzle, videosSchema } from "@repo/database";
 import { TranscriptSegment } from "@/types/types";
 import { similarText } from "./embedding";
 
@@ -36,13 +35,17 @@ export function mergeTranscript(transcripts: TranscriptSegment[]): string {
 
 type GenerateMarkdownOptions = {
   videoId: string;
+  url: string;
+  summary: string;
+  embeddingModel: EmbeddingModel<string>;
 };
 
-export async function generateMarkdown(
-  summary: string,
-  url: string,
-  { videoId }: GenerateMarkdownOptions,
-): Promise<string> {
+export async function generateMarkdown({
+  embeddingModel,
+  summary,
+  url,
+  videoId,
+}: GenerateMarkdownOptions): Promise<string> {
   const placeholders = summary.match(/<.+?>/g);
 
   if (!placeholders) {
@@ -50,7 +53,10 @@ export async function generateMarkdown(
   }
 
   for (const placeholder of placeholders) {
-    const replacementText = await processPlaceholder(placeholder, url, {
+    const replacementText = await processPlaceholder({
+      embeddingModel,
+      placeholder,
+      url,
       videoId,
     });
 
@@ -62,18 +68,26 @@ export async function generateMarkdown(
 
 type ProcessPlaceholderOptions = {
   videoId: string;
+  embeddingModel: EmbeddingModel<string>;
+  url: string;
+  placeholder: string;
 };
 
-async function processPlaceholder(
-  placeholder: string,
-  url: string,
-  { videoId }: ProcessPlaceholderOptions,
-) {
+async function processPlaceholder({
+  embeddingModel,
+  placeholder,
+  url,
+  videoId,
+}: ProcessPlaceholderOptions) {
   let sanitizedURL = url.replace(/[?&]t=\d+s?/, "");
 
   if (placeholder.startsWith("<HYPERLINK:")) {
     const text = placeholder.slice(11, -1);
-    const result = await similarText(text, { videoId });
+    const result = await similarText({
+      embeddingModel: embeddingModel,
+      text: text,
+      videoId: videoId,
+    });
 
     const timestamp = result.start;
     const formattedTime = secondsToHMS(timestamp);

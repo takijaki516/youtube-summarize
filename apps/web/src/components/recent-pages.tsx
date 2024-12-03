@@ -49,10 +49,12 @@ export function RecentPage() {
   }, [inView, hasNextPage, fetchNextPage]);
 
   return (
-    <div className="flex w-full max-w-3xl flex-col">
-      <h1 className="mt-32 text-center text-4xl font-bold">Recent Contents</h1>
+    <div className="flex w-full flex-1 flex-col items-center px-4">
+      <h1 className="animate-gradient mt-32 inline-block max-w-3xl bg-gradient-to-r from-red-500 to-white bg-clip-text text-center text-5xl font-bold text-transparent">
+        Recent Contents
+      </h1>
 
-      <div className="mt-8 w-full">
+      <div className="mt-8 w-full max-w-lg">
         <Input
           type="text"
           placeholder="Search videos..."
@@ -62,7 +64,7 @@ export function RecentPage() {
         />
       </div>
 
-      <ul className="mt-14 flex flex-col gap-4">
+      <ul className="mt-14 flex w-full max-w-lg flex-col gap-4">
         {status === "pending" ? (
           <div>Loading...</div>
         ) : status === "error" ? (
@@ -72,7 +74,7 @@ export function RecentPage() {
             {data.pages.map((page) =>
               page.videos.map((video: Video) => {
                 return (
-                  <li key={video.id}>
+                  <li key={video.id} className="w-full">
                     <VideoCard video={video} />
                   </li>
                 );

@@ -1,5 +1,6 @@
+import { generateText, type LanguageModel } from "ai";
+
 import { OpenAIError } from "./llm-error";
-import { openai } from "./openai";
 
 const SYSTEMPROMPT = `You are an expert at summarizing and structuring content into a comprehensive guide.
 Below is a script from a video that I am making into a companion guide blog post first.
@@ -51,10 +52,13 @@ Remember to Create titles or headings that encapsulate main points and ideas!!!
 Also remember to match the language of the transcript AT ALL COSTS!!!
 `;
 
-export async function generateSummary(transcript: string): Promise<string> {
+export async function generateSummary(
+  transcript: string,
+  llmModel: LanguageModel,
+): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const { text: generatedSummary } = await generateText({
+      model: llmModel,
       messages: [
         {
           role: "system",
@@ -67,9 +71,6 @@ export async function generateSummary(transcript: string): Promise<string> {
       ],
       temperature: 0,
     });
-
-    const generatedSummary =
-      response.choices[0]?.message?.content || "Unable to generate summary.";
 
     return generatedSummary;
   } catch (error) {

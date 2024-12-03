@@ -5,7 +5,7 @@ import { SidebarHomeButton } from "./sidebar-home-button";
 
 export function Sidebar() {
   return (
-    <nav className="hidden h-full w-16 flex-col items-center justify-center gap-4 border-r sm:flex">
+    <nav className="sticky top-0 hidden h-dvh w-16 flex-col items-center justify-center gap-4 border-r sm:flex">
       <SidebarHomeButton />
       <SidebarTranscriptVideo />
       <SidebarAISetting />

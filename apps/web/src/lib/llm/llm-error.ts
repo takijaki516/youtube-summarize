@@ -9,3 +9,9 @@ export class OpenAIError extends LLMError {
     super(`[OpenAI] 🚨 ${message}`);
   }
 }
+
+export class APIKeyNotSetError extends LLMError {
+  constructor(message:string) {
+    super(`[APIKEY NOT SET] 🚨 ${message}`);
+  }
+}

@@ -1,4 +1,4 @@
-export function GPTLogo() {
+export function OpenAILogo() {
   return (
     <svg
       fill="currentColor"

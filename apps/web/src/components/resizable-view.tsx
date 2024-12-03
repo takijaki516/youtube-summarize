@@ -1,5 +1,6 @@
 "use client";
 
+import { useMatchesMedia } from "@/lib/hooks/use-match-media";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -12,8 +13,13 @@ export function ResizableView({ children }: { children: React.ReactNode }) {
     return null;
   }
 
+  const isLarge = useMatchesMedia("(min-width: 1024px)");
+
   return (
-    <ResizablePanelGroup direction="horizontal" className="w-full">
+    <ResizablePanelGroup
+      direction={isLarge ? "horizontal" : "vertical"}
+      className="w-full overflow-x-clip"
+    >
       <ResizablePanel defaultSize={50}>{children[0]}</ResizablePanel>
 
       <ResizableHandle withHandle />

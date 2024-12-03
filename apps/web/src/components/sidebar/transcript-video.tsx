@@ -11,7 +11,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,21 +18,48 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useLLMStore } from "@/lib/store/llm-store";
+import { TranscriptRequestSchema } from "@/types/types";
 
 export function SidebarTranscriptVideo() {
-  const [url, setUrl] = React.useState("");
+  const [inputUrl, setInputUrl] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [isOpen, setIsOpen] = React.useState(false);
   const router = useRouter();
+  const { currentEmbedding, currentLLM } = useLLMStore();
 
   const generateSummary = async () => {
-    setIsLoading(true);
-
     try {
+      setIsLoading(true);
+
+      const validated = TranscriptRequestSchema.safeParse({
+        url: inputUrl,
+        model: currentLLM?.model,
+        provider: currentLLM?.provider,
+        embeddingModel: currentEmbedding?.model,
+        embeddingProvider: currentEmbedding?.provider,
+      });
+
+      // TODO: better error
+      if (!validated.success) {
+        toast.error(`Provide URL, API Key, Embedding Settings`);
+        return;
+      }
+
+      const { url, model, provider, embeddingModel, embeddingProvider } =
+        validated.data;
+
       const res = await fetch("/api/transcript", {
+        headers: {
+          "Content-Type": "application/json",
+        },
         method: "POST",
         body: JSON.stringify({
           url,
+          model,
+          provider,
+          embeddingModel,
+          embeddingProvider,
         }),
       });
 
@@ -42,13 +68,12 @@ export function SidebarTranscriptVideo() {
         return;
       }
 
-      const vId = (await res.json()).vId;
+      const { vId } = await res.json();
       router.push(`/video/${vId}`);
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Not possible to generate summary");
     } finally {
       setIsLoading(false);
-      setUrl("");
       setIsOpen(false);
     }
   };
@@ -62,13 +87,16 @@ export function SidebarTranscriptVideo() {
   return (
     <Tooltip>
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-        <DialogTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Plus className="h-6 w-6" />
-            </Button>
-          </TooltipTrigger>
-        </DialogTrigger>
+        <TooltipTrigger asChild>
+          <Button
+            onClick={() => setIsOpen(true)}
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
+        </TooltipTrigger>
 
         <DialogContent>
           <DialogHeader>
@@ -78,8 +106,8 @@ export function SidebarTranscriptVideo() {
             <Input
               placeholder="Enter YouTube URL"
               type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              value={inputUrl}
+              onChange={(e) => setInputUrl(e.target.value)}
             />
             {isLoading ? (
               <div className="flex items-center justify-center">

@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 // Transcript object structure
 export type TranscriptSegment = {
   text: string;
@@ -18,3 +20,14 @@ declare global {
     onYouTubeIframeAPIReady: () => void;
   }
 }
+
+export const TranscriptRequestSchema = z.object({
+  model: z.string(),
+  provider: z.enum(["openai", "anthropic", "gemini"]),
+  embeddingModel: z.enum(["text-embedding-3-small", "bge-m3"]),
+  embeddingProvider: z.enum(["openai", "ollama"]),
+  url: z.string().url(),
+});
+
+// TODO: better typing
+export type TranscriptRequest = z.infer<typeof TranscriptRequestSchema>;

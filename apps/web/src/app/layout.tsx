@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={"h-dvh"}>
+      <body>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -27,7 +27,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProviders>
-            <main className="flex h-full w-full">
+            <main className="relative flex min-h-dvh w-full">
               <Sidebar />
               {children}
               <Toaster richColors={true} />

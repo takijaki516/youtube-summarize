@@ -23,7 +23,7 @@ export default async function VideoPage({
   }
 
   return (
-    <div className="flex flex-1 items-center bg-background">
+    <div className="flex h-dvh flex-1 items-center bg-background">
       <ResizableView>
         {getYouTubeVideoId(video[0].url) ? (
           <YouTubePlayer videoId={getYouTubeVideoId(video[0].url)!} />
