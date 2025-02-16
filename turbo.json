@@ -1,12 +1,14 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [
+    "GEMINI_API_KEY",
     "AUTH_GOOGLE_ID",
     "AUTH_GOOGLE_SECRET",
-    "OPENAI_API_KEY",
-    "DATABASE_URL",
-    "AUTH_TRUST_HOST",
-    "PROXY_URL"
+    "GOOGLE_YOUTUBE_API_KEY",
+    "MY_PROXY_URL",
+    "BETTER_AUTH_URL",
+    "BETTER_AUTH_SECRET",
+    "DATABASE_URL"
   ],
   "tasks": {
     "build": {
