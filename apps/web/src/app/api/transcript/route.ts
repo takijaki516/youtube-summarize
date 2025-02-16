@@ -1,9 +1,6 @@
-import ytdl from "ytdl-core";
-import { eq } from "drizzle-orm";
-import { HttpsProxyAgent } from "https-proxy-agent";
+import { NextResponse, type NextRequest } from "next/server";
+import { drizzleClient, schema } from "@repo/database";
 
-import { auth } from "@/auth";
-import { dbDrizzle, videosSchema, userRateLimitsSchema } from "@repo/database";
 import { embedTranscript } from "@/lib/llm/embedding";
 import {
   generateMarkdown,
@@ -11,83 +8,88 @@ import {
   mergeTranscript,
 } from "@/lib/llm/transcript";
 import { generateSummary } from "@/lib/llm/summarize";
-import { env } from "@/lib/env";
+import { auth } from "@/lib/auth";
+import { getMinimalVideoInfoFromAPI } from "@/lib/queries/youtube-info";
 
-export const POST = auth(async function POST(req) {
-  if (!req.auth) {
+export const POST = async function POST(req: NextRequest) {
+  const session = await auth.api.getSession({ headers: req.headers });
+  if (!session) {
     return Response.json({ message: "Unauthorized" }, { status: 401 });
   }
-  const userId = req.auth.user.id;
 
-  // Check rate limit
-  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-  const userLimit = await dbDrizzle
-    .select()
-    .from(userRateLimitsSchema)
-    .where(eq(userRateLimitsSchema.userId, userId));
+  const userId = session.user.id;
 
-  if (userLimit[0]) {
-    if (userLimit[0].lastReset < tenMinutesAgo) {
-      // Reset counter if 10 minutes have passed
-      await dbDrizzle
-        .update(userRateLimitsSchema)
-        .set({ requestCount: 1, lastReset: new Date() })
-        .where(eq(userRateLimitsSchema.userId, userId));
-    } else if (userLimit[0].requestCount >= 5) {
-      return Response.json({ message: "Rate limit exceeded" }, { status: 429 });
-    } else {
-      // Increment counter
-      await dbDrizzle
-        .update(userRateLimitsSchema)
-        .set({ requestCount: userLimit[0].requestCount + 1 })
-        .where(eq(userRateLimitsSchema.userId, userId));
-    }
-  } else {
-    // Create new rate limit record
-    await dbDrizzle.insert(userRateLimitsSchema).values({
-      userId,
-      requestCount: 1,
-      lastReset: new Date(),
-    });
-  }
+  // TODO: 10 query per day Check rate limit
+  // const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+  // const userLimit = await drizzleClient
+  //   .select()
+  //   .from(schema.userRateLimitsSchema)
+  //   .where(eq(schema.userRateLimitsSchema.userId, userId));
+
+  // if (userLimit[0]) {
+  //   if (userLimit[0].lastReset < tenMinutesAgo) {
+  //     // Reset counter if 10 minutes have passed
+  //     await drizzleClient
+  //       .update(schema.userRateLimitsSchema)
+  //       .set({ requestCount: 1, lastReset: new Date() })
+  //       .where(eq(schema.userRateLimitsSchema.userId, userId));
+  //   } else if (userLimit[0].requestCount >= 5) {
+  //     return Response.json({ message: "Rate limit exceeded" }, { status: 429 });
+  //   } else {
+  //     // Increment counter
+  //     await drizzleClient
+  //       .update(schema.userRateLimitsSchema)
+  //       .set({ requestCount: userLimit[0].requestCount + 1 })
+  //       .where(eq(schema.userRateLimitsSchema.userId, userId));
+  //   }
+  // } else {
+  //   // Create new rate limit record
+  //   await drizzleClient.insert(schema.userRateLimitsSchema).values({
+  //     userId,
+  //     requestCount: 1,
+  //     lastReset: new Date(),
+  //   });
+  // }
 
   const { url } = await req.json();
+  if (!url) {
+    return Response.json({ error: "URL is required" }, { status: 400 });
+  }
+  const videoInfoRes = await getMinimalVideoInfoFromAPI(url);
 
-  const proxyUrl = env.PROXY_URL;
-  const httpProxyAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
+  const videoTitle = videoInfoRes.title;
+  const videoId = videoInfoRes.videoId;
 
-  const videoInfo = await ytdl.getBasicInfo(url, {
-    requestOptions: {
-      agent: proxyUrl ? httpProxyAgent : undefined,
-      headers: {
-        // Add common browser headers to look more legitimate
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        Connection: "keep-alive",
+  const transcripts = await getTranscript(videoId);
+  const originalTranscriptLanguage = transcripts[0]?.lang;
+
+  if (!originalTranscriptLanguage) {
+    return NextResponse.json(
+      {
+        message: "Transcript not available",
       },
-    },
-  });
-  const videoTitle = videoInfo.videoDetails.title;
-  const transcripts = await getTranscript(url, {
-    agent: httpProxyAgent,
-  });
+      {
+        status: 500,
+      },
+    );
+  }
+
   const mergedTranscript = mergeTranscript(transcripts);
   const summaryText = await generateSummary(mergedTranscript);
 
   // TODO: change video ID to be uuid so we can use when storing embeddings which makes inserting video later with generated summary
-  const insertedVideo = await dbDrizzle
-    .insert(videosSchema)
+  const insertedVideo = await drizzleClient
+    .insert(schema.videosSchema)
     .values({
-      url,
+      url: url,
       title: videoTitle,
       summary: "not yet generated",
+      originalTranscriptLanguage: originalTranscriptLanguage,
       userId,
+      videoId: videoId,
     })
     .returning({
-      id: videosSchema.id,
+      id: schema.videosSchema.id,
     });
 
   if (!insertedVideo[0]) {
@@ -99,11 +101,11 @@ export const POST = auth(async function POST(req) {
 
   // store embedding and its offset(time) for lookup when generating links(timestamps)
   await embedTranscript(transcripts, {
-    videoId: insertedVideo[0].id,
+    videoSchemaId: insertedVideo[0].id,
     userId,
   });
-  await generateMarkdown(summaryText, url, {
-    videoId: insertedVideo[0].id,
+  await generateMarkdown(summaryText, url, originalTranscriptLanguage, {
+    videoSchemaId: insertedVideo[0].id,
     userId,
   });
 
@@ -111,4 +113,4 @@ export const POST = auth(async function POST(req) {
     { message: "Embedded Transcript", vId: insertedVideo[0].id },
     { status: 201 },
   );
-});
+};

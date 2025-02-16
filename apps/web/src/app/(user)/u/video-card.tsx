@@ -6,10 +6,10 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
-import type { Video } from "@repo/database";
+import { schema } from "@repo/database";
 import { Button } from "@/components/ui/button";
 
-export function VideoCard({ video }: { video: Video }) {
+export function VideoCard({ video }: { video: schema.Video }) {
   const [isDeleting, setIsDeleting] = React.useState(false);
   const queryClient = useQueryClient();
 

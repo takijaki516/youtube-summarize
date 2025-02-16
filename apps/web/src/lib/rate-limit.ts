@@ -1,5 +1,5 @@
-import { dbDrizzle, rateLimitsSchema } from "@repo/database";
 import { sql } from "drizzle-orm";
+import { drizzleClient, schema } from "@repo/database";
 
 export class RateLimitError extends Error {
   constructor(message: string) {
@@ -9,7 +9,7 @@ export class RateLimitError extends Error {
 }
 
 export async function checkRateLimit(
-  key: string,
+  clientUUID: string,
   limit: number,
   windowMs: number,
 ) {
@@ -17,24 +17,25 @@ export async function checkRateLimit(
     const now = new Date();
     const resetAt = new Date(now.getTime() + windowMs);
 
-    const [updated] = await dbDrizzle
-      .insert(rateLimitsSchema)
+    const [updated] = await drizzleClient
+      .insert(schema.rateLimitsSchema)
       .values({
-        key,
+        clientUUID,
         count: 1,
         resetAt,
       })
       .onConflictDoUpdate({
-        target: rateLimitsSchema.key,
+        target: schema.rateLimitsSchema.clientUUID,
         set: {
-          // Reset count if window expired, otherwise increment
+          //
           count: sql`CASE 
-            WHEN ${rateLimitsSchema.resetAt} <= ${now.toISOString()} THEN 1 
-            ELSE ${rateLimitsSchema.count} + 1 
+            WHEN ${schema.rateLimitsSchema.resetAt} <= ${now.toISOString()} THEN 1 
+            ELSE ${schema.rateLimitsSchema.count} + 1 
           END`,
+          //
           resetAt: sql`CASE 
-            WHEN ${rateLimitsSchema.resetAt} <= ${now.toISOString()} THEN ${resetAt.toISOString()} 
-            ELSE ${rateLimitsSchema.resetAt}
+            WHEN ${schema.rateLimitsSchema.resetAt} <= ${now.toISOString()} THEN ${resetAt.toISOString()} 
+            ELSE ${schema.rateLimitsSchema.resetAt}
           END`,
           updatedAt: now,
         },
@@ -49,7 +50,6 @@ export async function checkRateLimit(
       throw error;
     }
 
-    console.error("Rate limit check error:", error);
     throw error;
   }
 }

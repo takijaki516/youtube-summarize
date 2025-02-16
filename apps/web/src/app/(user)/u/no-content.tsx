@@ -27,6 +27,7 @@ export function NoContent() {
         body: JSON.stringify({
           url,
         }),
+        // credentials: "same-origin",
       });
 
       if (!res.ok) {
@@ -51,7 +52,10 @@ export function NoContent() {
   return (
     <>
       <div className="mt-20 max-w-md text-4xl md:text-5xl lg:text-6xl">
-        <h1 className="text-center text-foreground">Summarize Youtube video</h1>
+        <h1 className="text-center text-foreground">
+          영상을
+          <br /> 요약해보세요!
+        </h1>
       </div>
 
       <div className="relative mt-10 w-full max-w-md">

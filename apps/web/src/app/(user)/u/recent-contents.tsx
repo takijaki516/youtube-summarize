@@ -1,17 +1,16 @@
 "use client";
 
 import * as React from "react";
-
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
+import { schema } from "@repo/database";
 
-import { useDebounce } from "../../../lib/hooks/use-debounce";
-import type { Video } from "../../../../../../packages/database/src/schema/video";
-import { Input } from "../../../components/ui/input";
+import { useDebounce } from "@/lib/hooks/use-debounce";
+import { Input } from "@/components/ui/input";
 import { VideoCard } from "./video-card";
 
 interface VideosResponse {
-  videos: Video[];
+  videos: schema.Video[];
   nextPage: number | null;
   totalCount: number;
 }
@@ -51,12 +50,12 @@ export function RecentContents() {
 
   return (
     <div className="flex w-full max-w-3xl flex-col">
-      <h1 className="mt-32 text-center text-4xl font-bold">Recent Contents</h1>
+      <h1 className="mt-32 text-center text-4xl font-bold">최신 컨텐츠</h1>
 
       <div className="mt-8 w-full">
         <Input
           type="text"
-          placeholder="Search videos..."
+          placeholder="찾아보기..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full rounded-md focus:outline-none"
@@ -65,13 +64,13 @@ export function RecentContents() {
 
       <ul className="mt-14 flex flex-col gap-4">
         {status === "pending" ? (
-          <div>Loading...</div>
+          <div>찾는중...</div>
         ) : status === "error" ? (
-          <div>Error loading videos</div>
+          <div>찾지 못했습니다. 다시 시도해주세요.</div>
         ) : (
           <>
             {data.pages.map((page) =>
-              page.videos.map((video: Video) => {
+              page.videos.map((video: schema.Video) => {
                 return (
                   <li key={video.id}>
                     <VideoCard video={video} />
@@ -81,7 +80,7 @@ export function RecentContents() {
             )}
 
             <li ref={ref} className="h-10">
-              {isFetchingNextPage ? "Loading more..." : null}
+              {isFetchingNextPage ? "더 보기" : null}
             </li>
           </>
         )}

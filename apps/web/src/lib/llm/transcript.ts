@@ -1,16 +1,17 @@
+import { generateText } from "ai";
 import { eq } from "drizzle-orm";
+import { drizzleClient, schema } from "@repo/database";
 
 import { YoutubeTranscript } from "../youtube-transcript";
-import { dbDrizzle, videosSchema, tempVideosSchema } from "@repo/database";
-import { TranscriptSegment } from "../../types/types";
 import { similarText } from "./embedding";
+import type { RequestOptions, TranscriptSegment } from "@/types/types";
+import { google } from "./google";
 
 export async function getTranscript(url: string): Promise<TranscriptSegment[]> {
   const transcripts = await YoutubeTranscript.fetchTranscript(url);
 
   let cur = 0;
 
-  // NOTE: how to evaluate if this is a good chunk size?
   // chunking transcript for embedding vectors
   while (cur < transcripts.length - 1) {
     if (transcripts[cur]!.text.length < 125) {
@@ -34,22 +35,11 @@ export function mergeTranscript(transcripts: TranscriptSegment[]): string {
   return mergedTranscript;
 }
 
-type GenerateMarkdownOptions =
-  | {
-      videoId: number;
-      isTemp: true;
-      userId?: never;
-    }
-  | {
-      videoId: number;
-      userId: string;
-      isTemp?: false;
-    };
-
 export async function generateMarkdown(
   transcript: string,
   url: string,
-  { videoId, isTemp, userId }: GenerateMarkdownOptions,
+  lang: string,
+  { videoSchemaId, isGuest, userId, clientUUID }: RequestOptions,
 ) {
   const placeholders = transcript.match(/<.+?>/g);
 
@@ -57,82 +47,111 @@ export async function generateMarkdown(
     return;
   }
 
-  if (isTemp) {
+  if (isGuest) {
     for (const placeholder of placeholders) {
       const replacementText = await processPlaceholder(placeholder, url, {
-        videoId,
-        isTemp,
+        clientUUID,
+        videoSchemaId,
+        isGuest,
       });
 
       transcript = transcript.replace(placeholder, replacementText);
     }
 
-    await dbDrizzle
-      .update(tempVideosSchema)
-      .set({
-        summary: transcript,
-      })
-      .where(eq(tempVideosSchema.id, videoId));
+    if (lang !== "ko") {
+      const res = await generateText({
+        model: google("gemini-2.0-flash-001"),
+        system: "translate to korean",
+        prompt: transcript,
+      });
+
+      await drizzleClient
+        .update(schema.tempVideosSchema)
+        .set({
+          summary: transcript,
+          translatedSummary: res.text,
+        })
+        .where(eq(schema.tempVideosSchema.id, videoSchemaId));
+    } else {
+      await drizzleClient
+        .update(schema.tempVideosSchema)
+        .set({
+          summary: transcript,
+        })
+        .where(eq(schema.tempVideosSchema.id, videoSchemaId));
+    }
   } else {
+    // not guest
     for (const placeholder of placeholders) {
       const replacementText = await processPlaceholder(placeholder, url, {
-        videoId,
+        videoSchemaId,
         userId,
       });
 
       transcript = transcript.replace(placeholder, replacementText);
     }
 
-    await dbDrizzle
-      .update(videosSchema)
-      .set({
-        summary: transcript,
-      })
-      .where(eq(videosSchema.id, videoId));
+    if (lang !== "ko") {
+      const res = await generateText({
+        model: google("gemini-2.0-flash-001"),
+        system: "translate to korean",
+        prompt: transcript,
+      });
+
+      await drizzleClient
+        .update(schema.videosSchema)
+        .set({
+          summary: transcript,
+          translatedSummary: res.text,
+        })
+        .where(eq(schema.videosSchema.id, videoSchemaId));
+    } else {
+      await drizzleClient
+        .update(schema.videosSchema)
+        .set({
+          summary: transcript,
+        })
+        .where(eq(schema.videosSchema.id, videoSchemaId));
+    }
   }
 }
-
-type ProcessPlaceholderOptions =
-  | {
-      videoId: number;
-      isTemp: true;
-      userId?: never;
-    }
-  | {
-      videoId: number;
-      userId: string;
-      isTemp?: false;
-    };
 
 async function processPlaceholder(
   placeholder: string,
   url: string,
-  { videoId, userId, isTemp }: ProcessPlaceholderOptions,
+  { videoSchemaId, userId, isGuest, clientUUID }: RequestOptions,
 ) {
   let sanitizedURL = url.replace(/[?&]t=\d+s?/, "");
 
   // NOTE: isTemp is for user
-  if (isTemp) {
+  if (isGuest) {
     if (placeholder.startsWith("<HYPERLINK:")) {
       const text = placeholder.slice(11, -1);
-      const result = await similarText(text, { videoId, isTemp });
+      const result = await similarText(text, {
+        videoSchemaId,
+        clientUUID,
+        isGuest,
+      });
 
-      const timestamp = result.start;
+      const timestamp = result.start_offset;
       const formattedTime = secondsToHMS(timestamp);
 
-      return `[YOUTUBE VIDEO: ${formattedTime}](${sanitizedURL}&t=${timestamp}s)`;
+      return `[${formattedTime}](${sanitizedURL}&t=${timestamp}s)`;
     } else {
       return placeholder;
     }
   } else {
     if (placeholder.startsWith("<HYPERLINK:")) {
       const text = placeholder.slice(11, -1);
-      const result = await similarText(text, { videoId, userId });
+      const result = await similarText(text, {
+        videoSchemaId,
+        userId,
+      });
 
-      const timestamp = result.start;
+      const timestamp = result.start_offset;
       const formattedTime = secondsToHMS(timestamp);
 
-      return `[YOUTUBE VIDEO: ${formattedTime}](${sanitizedURL}&t=${timestamp}s)`;
+      return `[${formattedTime}](${sanitizedURL}&t=${timestamp}s)`;
     } else {
       return placeholder;
     }

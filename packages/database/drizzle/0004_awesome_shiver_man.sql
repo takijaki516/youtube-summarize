@@ -1,0 +1,1 @@
+ALTER TABLE "tempEmbedding" ALTER COLUMN "embedding" SET DATA TYPE vector(768);

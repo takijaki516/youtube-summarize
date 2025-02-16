@@ -1,4 +1,5 @@
 import miniget from "miniget";
+import { proxyAgent } from "@/lib/proxy";
 
 const RE_YOUTUBE =
   /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
@@ -73,16 +74,17 @@ export class YoutubeTranscript {
     videoId: string,
     config?: TranscriptConfig,
   ): Promise<TranscriptResponse[]> {
-    const identifier = this.retrieveVideoId(videoId);
     const videoPageResponse = await miniget(
-      `https://www.youtube.com/watch?v=${identifier}`,
+      `https://www.youtube.com/watch?v=${videoId}`,
       {
         headers: {
-          ...(config?.lang && { "Accept-Language": config.lang }),
+          "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
           "User-Agent": USER_AGENT,
         },
+        agent: proxyAgent,
       },
     );
+
     const videoPageBody = await videoPageResponse.text();
 
     const splittedHTML = videoPageBody.split('"captions":');
@@ -158,22 +160,5 @@ export class YoutubeTranscript {
       offset: parseFloat(result[1] || "0"),
       lang: config?.lang ?? captions.captionTracks[0].languageCode,
     }));
-  }
-
-  /**
-   * Retrieve video id from url or string
-   * @param videoId video url or video id
-   */
-  private static retrieveVideoId(videoId: string) {
-    if (videoId.length === 11) {
-      return videoId;
-    }
-    const matchId = videoId.match(RE_YOUTUBE);
-    if (matchId && matchId.length) {
-      return matchId[1];
-    }
-    throw new YoutubeTranscriptError(
-      "Impossible to retrieve Youtube video ID.",
-    );
   }
 }

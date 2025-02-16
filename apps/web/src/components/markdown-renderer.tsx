@@ -35,7 +35,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
             return (
               <span
                 onClick={() => setStartTime(timestamp)}
-                className="underline underline-offset-2 opacity-80 transition-opacity duration-200 hover:opacity-100"
+                className="text-green-500 underline underline-offset-2 opacity-70 transition-opacity duration-200 hover:cursor-pointer hover:opacity-100"
               >
                 {children}
               </span>

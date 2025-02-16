@@ -1,15 +1,19 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { neon, neonConfig } from "@neondatabase/serverless";
+import { drizzle as drizzleHttp } from "drizzle-orm/neon-http";
 
-const connectionString = process.env.DATABASE_URL!;
+import { env } from "../env.mjs";
 
-let client;
+let connectionString = env.DATABASE_URL;
 
-if (process.env.NODE_ENV === "development") {
-  client = postgres(connectionString);
-} else {
-  // Disable prefetch as it is not supported for "Transaction" pool mode
-  client = postgres(connectionString, { prepare: false });
+if (env.NODE_ENV === "development") {
+  connectionString =
+    "postgres://postgres:postgres@db.localtest.me:5432/youtube_chat";
+  neonConfig.fetchEndpoint = (host) => {
+    const [protocol, port] =
+      host === "db.localtest.me" ? ["http", 4444] : ["https", 443];
+    return `${protocol}://${host}:${port}/sql`;
+  };
 }
 
-export const dbDrizzle = drizzle(client);
+const sql = neon(connectionString);
+export const drizzleClient = drizzleHttp(sql);

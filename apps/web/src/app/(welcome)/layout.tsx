@@ -1,19 +1,24 @@
-import { Navbar } from "@/components/navbar";
-import { cn } from "@/lib/utils";
-import { TailwindIndicator } from "@/components/tailwind-indicator";
-import { Toaster } from "@/components/ui/sonner";
+import { redirect } from "next/navigation";
 
-export default function RootLayout({
+import { cn } from "@/lib/utils";
+import { getSession } from "@/lib/queries/auth";
+import { Navbar } from "@/components/navbar";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getSession();
+
+  if (session) {
+    redirect("/u");
+  }
+
   return (
     <div className={cn("flex h-dvh flex-col")}>
       <Navbar />
       {children}
-      <Toaster richColors={true} />
-      <TailwindIndicator />
     </div>
   );
 }

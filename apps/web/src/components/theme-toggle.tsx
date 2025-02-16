@@ -29,15 +29,16 @@ export function ModeToggle({ side, align }: ModeToggleProps) {
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side={side} align={align}>
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
+
+      <DropdownMenuContent side={side} align={align} alignOffset={4}>
+        <DropdownMenuItem onClick={() => setTheme("light")} className="cursor-pointer">
+          라이트모드
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
+        <DropdownMenuItem onClick={() => setTheme("dark")}  className="cursor-pointer">
+          다크모드
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
+        <DropdownMenuItem onClick={() => setTheme("system")} className="cursor-pointer">
+          시스템
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

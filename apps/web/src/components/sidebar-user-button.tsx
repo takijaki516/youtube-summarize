@@ -1,55 +1,64 @@
 "use client";
 
 import * as React from "react";
-import { LogOut, UserIcon } from "lucide-react";
-import type { Session } from "next-auth";
+import { Loader, LogOut, UserIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-import { Button } from "./ui/button";
+import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
-import { signOut } from "../auth";
-import { signOutAction } from "../actions/auth";
+} from "@/components/ui/dropdown-menu";
 
-interface SidebarUserButtonProps {
-  session: Session;
-}
+export function SidebarUserButton() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = React.useState(false);
 
-export function SidebarUserButton({ session }: SidebarUserButtonProps) {
+  async function signOutHandler() {
+    setIsLoading(true);
+
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.replace("/");
+        },
+        onError: () => {
+          toast.error("로그아웃에 실패했어요. 다시 시도해주세요");
+        },
+      },
+    });
+
+    setIsLoading(false);
+  }
+
   return (
-    <Tooltip>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="cursor-pointer">
-              <UserIcon />
-            </Button>
-          </TooltipTrigger>
-        </DropdownMenuTrigger>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="cursor-pointer">
+          <UserIcon />
+        </Button>
+      </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="start" side="right" className="w-fit">
-          <DropdownMenuItem className="p-0">
-            <form action={signOutAction} className="w-full">
-              <Button
-                type="submit"
-                variant="destructive"
-                className="flex w-full justify-between"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </Button>
-            </form>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <TooltipContent>
-        <p>User</p>
-      </TooltipContent>
-    </Tooltip>
+      <DropdownMenuContent align="start" side="right" className="w-fit">
+        <DropdownMenuItem className="p-0">
+          <Button
+            variant="destructive"
+            className="flex w-full justify-between"
+            onClick={signOutHandler}
+          >
+            {isLoading ? (
+              <Loader className="h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="h-4 w-4" />
+            )}
+            Sign Out
+          </Button>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

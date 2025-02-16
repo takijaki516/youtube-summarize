@@ -5,6 +5,11 @@ export const tempVideosSchema = pgTable("tempVideo", {
   title: text("title").notNull(),
   url: text("url").notNull(),
   summary: text("summary").notNull(),
+  originalTranscriptLanguage: text("originalTranscriptLanguage").notNull(),
+  translatedSummary: text("translatedSummary"),
+
+  clientUUID: text("clientUUID").notNull(),
+  videoId: text("videoId").notNull(),
 
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),

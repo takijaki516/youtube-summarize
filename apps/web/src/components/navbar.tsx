@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Home } from "lucide-react";
 
 import { ModeToggle } from "./theme-toggle";
-import { GoogleLoginButton } from "./login-button";
+import { buttonVariants } from "./ui/button";
 
 export function Navbar() {
   return (
@@ -18,7 +18,15 @@ export function Navbar() {
       </Link>
 
       <div className="flex items-center gap-4 sm:gap-6">
-        <GoogleLoginButton />
+        <Link
+          className={buttonVariants({
+            variant: "outline",
+          })}
+          href={"/signin"}
+        >
+          로그인
+        </Link>
+
         <ModeToggle side="bottom" align="end" />
       </div>
     </nav>

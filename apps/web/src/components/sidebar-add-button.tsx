@@ -57,7 +57,10 @@ export function AddVideoDialog() {
   const handleOpenChange = (open: boolean) => {
     if (!isLoading) {
       setIsOpen(open);
+      return;
     }
+
+    toast.info("요청을 처리 중입니다. 잠시만 기다려주세요.");
   };
 
   return (
@@ -65,14 +68,15 @@ export function AddVideoDialog() {
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button variant="ghost" size="icon" className="rounded-md">
               <Plus className="h-6 w-6" />
             </Button>
           </TooltipTrigger>
         </DialogTrigger>
+
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add YouTube Video</DialogTitle>
+            <DialogTitle>원히는 유튜브 영상을 요약해보세요</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4">
             <Input
@@ -81,13 +85,18 @@ export function AddVideoDialog() {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
             />
-            {isLoading ? (
-              <div className="flex items-center justify-center">
+
+            <Button
+              onClick={generateSummary}
+              className="flex items-center justify-center"
+              disabled={isLoading}
+            >
+              {isLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : (
-              <Button onClick={generateSummary}>Add Video</Button>
-            )}
+              ) : (
+                "요약하기"
+              )}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -1,14 +1,3 @@
-import "next-auth/jwt";
-import type { User } from "next-auth";
-
-declare module "next-auth" {
-  export interface Session {
-    user: User & {
-      id: string;
-    };
-  }
-}
-
 // Transcript object structure
 export type TranscriptSegment = {
   text: string;
@@ -18,11 +7,24 @@ export type TranscriptSegment = {
 };
 
 export type SimilarSearchResult = {
-  text: string;
-  start: number;
+  text_field: string;
+  start_offset: number;
   lang: string;
   cosine_similarity: number;
 };
+
+export type RequestOptions = { videoSchemaId: number } & (
+  | {
+      isGuest: true;
+      clientUUID: string;
+      userId?: never;
+    }
+  | {
+      isGuest?: false | null | undefined;
+      clientUUID?: never;
+      userId: string;
+    }
+);
 
 declare global {
   interface Window {

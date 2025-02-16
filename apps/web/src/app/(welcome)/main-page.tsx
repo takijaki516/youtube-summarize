@@ -14,35 +14,34 @@ export function MainPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [url, setUrl] = React.useState("");
 
-  const generateSummary = async () => {
+  async function genSummary() {
     try {
       setIsLoading(true);
 
-      const res = await fetch("/api/temp", {
+      const res = await fetch("/api/guest", {
         method: "POST",
         body: JSON.stringify({ url }),
       });
 
       if (!res.ok) {
         if (res.status === 429) {
-          toast.error(
-            "Rate limit exceeded. Please try again later, or Sign up for more requests.",
-          );
+          toast.error("사용량을 초과하였어요. 잠시 후 다시 시도해주세요");
           return;
         }
 
-        toast.error("Failed to generate summary");
-        return;
+        throw new Error("Failed to generate summary");
       }
 
-      const { vId } = await res.json();
-      router.push(`/temp/${vId}`);
+      const body = await res.json();
+
+      toast.success("성공했어요");
+      router.push(`/guest/${body.vId}`);
     } catch (error) {
-      toast.error("Not possible to generate summary");
+      toast.error("실패했어요. 다시 시도해주세요");
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   return (
     <main className="flex flex-col bg-background py-14">
@@ -56,7 +55,7 @@ export function MainPage() {
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
               <span className="animate-gradient inline-block bg-gradient-to-r from-red-500 to-white bg-clip-text text-transparent">
-                Summarize YouTube Videos In Seconds
+                원하는 유튜브 영상의 요약해드릴께요
               </span>
             </motion.h1>
 
@@ -66,8 +65,7 @@ export function MainPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
             >
-              Get concise summaries of any YouTube video using our advanced
-              AI-powered transcript summarizer.
+              최신 AI를 활용해 유튜브 동영상을 간결하게 요약해드립니다.
             </motion.p>
 
             <motion.div
@@ -89,7 +87,7 @@ export function MainPage() {
                 className="absolute right-0 top-0 mt-0 hover:bg-primary hover:text-primary-foreground"
                 size="icon"
                 variant={"ghost"}
-                onClick={generateSummary}
+                onClick={genSummary}
               >
                 {isLoading ? <RotateCw className="animate-spin" /> : <Send />}
               </Button>

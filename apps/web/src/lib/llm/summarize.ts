@@ -1,22 +1,21 @@
-import { openai } from "./openai";
+import { generateText } from "ai";
+
+import { google } from "./google";
 
 const SYSTEMPROMPT = `You are an expert at summarizing and structuring content into a comprehensive guide.
-Below is a script from a video that I am making into a companion guide blog post first.
-- This is a continuation of a guide so include chapters, key summaries, and incorporate visual aids and direct links to relevant parts of the video however do not include any conclusion or overarching title.
+
+Given a transcript from a video, you are tasked with creating a structured guide that encapsulates the main points and ideas discussed in the video.
+- Guide should include chapters, key summaries, and direct links to relevant parts of the video. (Create titles or headings that encapsulate main points and ideas!)
 - For direct links, portions of the text should be hyperlinked to their corresponding times in the video.
 - To indicate that a sentence should be hyperlinked, insert the raw text of the transcript next to the word with the indicator <HYPERLINK: "corresponding transcript text">.
 - It is crucial to use the raw text from the transcript that will be used, as the additional tools that will be inserting the hyperlinks need this to know where in the video to look.
 - You must to match to language of the transcript AT ALL COSTS!!! If transcript is korean, you must to write korean!!!
 - Follow these instructions to create a structured guide from the transcript AT ALL COSTS!!! This is very important for blog post!!!
-- I will tip you extra if you do this well.
-
-In this blog post, in addition to the paragraphs:
-
-Create titles or headings that encapsulate main points and ideas!!
 
 Format your response in markdown, ensuring distinction and clean styling between titles and paragraphs.
-Be sure to include the image placeholders, and hyperlinks with enough distinguishable text WITHOUT ANY QUOTATIONS, as the placeholders will be fed into a semantic search algorithm.
+Be sure to include the hyperlinks with enough distinguishable text WITHOUT ANY QUOTATIONS, as the placeholders will be fed into a semantic search algorithm.
 This structured approach will be applied to the entire transcript.
+
 The example below only shows one style, but use multiple styles including different headings, bullet points, and other markdown elements when needed.
 
 Here are shortened example of the input and shortened expected output:
@@ -52,25 +51,14 @@ Also remember to match the language of the transcript AT ALL COSTS!!!
 
 export async function generateSummary(transcript: string): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: SYSTEMPROMPT,
-        },
-        {
-          role: "user",
-          content: `Here is the transcript: ${transcript}. This is very important to me!! TRY YOUR BEST!!!`,
-        },
-      ],
-      temperature: 0,
+    const response = await generateText({
+      model: google("gemini-2.0-flash-001"),
+      system: SYSTEMPROMPT,
+      prompt: `Here is the transcript: ${transcript}. This is very important to me!! TRY YOUR BEST!!!`,
+      temperature: 0.1,
     });
 
-    const generatedSummary =
-      response.choices[0]?.message?.content || "Unable to generate summary.";
-
-    return generatedSummary;
+    return response.text;
   } catch (error) {
     console.error("Error generating summary:", error);
     throw new Error("Failed to generate summary");
