@@ -64,6 +64,13 @@
       "when": 1739723801406,
       "tag": "0008_even_runaways",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1739899081510,
+      "tag": "0009_plain_blade",
+      "breakpoints": true
     }
   ]
 }

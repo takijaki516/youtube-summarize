@@ -77,7 +77,7 @@ export function MainPage() {
               <Input
                 type=""
                 id="url"
-                placeholder="youtube url"
+                placeholder="유튜브 영상 URL을 입력하세요"
                 className="w-full"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
@@ -91,6 +91,17 @@ export function MainPage() {
               >
                 {isLoading ? <RotateCw className="animate-spin" /> : <Send />}
               </Button>
+            </motion.div>
+
+            <motion.div
+              className="relative mt-10 w-full max-w-md"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
+            >
+              <span className="text-muted-foreground/70">
+                현재는 30분 이하의 동영상만 처리 가능합니다.
+              </span>
             </motion.div>
           </div>
         </div>

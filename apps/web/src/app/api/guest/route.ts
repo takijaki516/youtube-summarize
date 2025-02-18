@@ -35,18 +35,32 @@ export async function POST(req: Request) {
     await checkRateLimit(clientUUID, 3, 10 * 60 * 1000);
 
     const { url } = await req.json();
-
     if (!url) {
       return Response.json({ error: "URL is required" }, { status: 400 });
     }
 
     const videoInfoRes = await getMinimalVideoInfoFromAPI(url);
+    const duration = videoInfoRes.duration;
+
+    if (duration > 1800) {
+      return NextResponse.json(
+        {
+          message:
+            "동영상이 30분 이상입니다. 현재는 30분 이하의 동영상만 처리 가능합니다.",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
 
     const videoTitle = videoInfoRes.title;
     const videoId = videoInfoRes.videoId;
 
     const transcripts = await getTranscript(videoId);
     const originalTranscriptLanguage = transcripts[0]?.lang;
+
+    console.log("🚀 ~ POST ~ transcripts:", transcripts);
 
     if (!originalTranscriptLanguage) {
       return NextResponse.json(

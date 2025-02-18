@@ -18,6 +18,27 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       <ReactMarkdown
         rehypePlugins={[rehypeRaw]}
         components={{
+          h1({ node, children, ...props }) {
+            return (
+              <h1 className="mb-6 text-2xl font-medium sm:text-3xl" {...props}>
+                {children}
+              </h1>
+            );
+          },
+          h2({ node, children, ...props }) {
+            return (
+              <h2 className="mb-2 text-lg font-medium sm:text-xl" {...props}>
+                {children}
+              </h2>
+            );
+          },
+          h3({ node, children, ...props }) {
+            return (
+              <h3 className="mb-1 text-base font-medium sm:text-lg" {...props}>
+                {children}
+              </h3>
+            );
+          },
           a({ href, children }) {
             if (!href) {
               return null;
@@ -35,7 +56,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
             return (
               <span
                 onClick={() => setStartTime(timestamp)}
-                className="text-green-500 underline underline-offset-2 opacity-70 transition-opacity duration-200 hover:cursor-pointer hover:opacity-100"
+                className="ml-1 text-green-500 underline underline-offset-2 opacity-70 transition-opacity duration-200 hover:cursor-pointer hover:opacity-100"
               >
                 {children}
               </span>
@@ -47,7 +68,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           br({ children }) {
             return <br />;
           },
-          hr: () => <hr className="my-4 border-t border-gray-300" />,
+          hr: () => null,
           p: ({ node, ...props }) => <p className="mb-4" {...props} />,
         }}
       >

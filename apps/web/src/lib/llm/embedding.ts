@@ -25,37 +25,36 @@ export async function embedTranscript(
   transcript: TranscriptSegment[],
   { videoSchemaId, userId, isGuest, clientUUID }: RequestOptions,
 ): Promise<void> {
-  const texts = transcript.map((segment) => segment.text);
-  const embeddings = await getEmbeddings(texts);
+  const chunkSize = 100;
 
-  if (isGuest) {
-    transcript.map(async (segment, idx) => {
-      const embedding = embeddings[idx];
-      const language = segment.lang;
+  for (let i = 0; i < transcript.length; i += chunkSize) {
+    const chunk = transcript.slice(i, i + chunkSize);
+    const texts = chunk.map((segment) => segment.text);
+    const embeddings = await getEmbeddings(texts);
 
-      await drizzleClient.insert(schema.tempEmbeddingsSchema).values({
-        embedding: embedding,
-        text: segment.text,
-        lang: language,
-        start: Math.floor(segment.offset),
-        videoSchemaId: videoSchemaId,
-        clientUUID: clientUUID,
-      });
-    });
-  } else {
-    transcript.map(async (segment, idx) => {
-      const embedding = embeddings[idx];
-      const language = segment.lang;
-
-      await drizzleClient.insert(schema.embeddingsSchema).values({
-        embedding: embedding,
-        text: segment.text,
-        lang: language,
-        start: Math.floor(segment.offset),
-        videoSchemaId: videoSchemaId,
-        userId: userId,
-      });
-    });
+    if (isGuest) {
+      await drizzleClient.insert(schema.tempEmbeddingsSchema).values(
+        chunk.map((segment, idx) => ({
+          embedding: embeddings[idx],
+          text: segment.text,
+          lang: segment.lang,
+          start: Math.floor(segment.offset),
+          videoSchemaId: videoSchemaId,
+          clientUUID: clientUUID,
+        })),
+      );
+    } else {
+      await drizzleClient.insert(schema.embeddingsSchema).values(
+        chunk.map((segment, idx) => ({
+          embedding: embeddings[idx],
+          text: segment.text,
+          lang: segment.lang,
+          start: Math.floor(segment.offset),
+          videoSchemaId: videoSchemaId,
+          userId: userId,
+        })),
+      );
+    }
   }
 }
 

@@ -27,7 +27,6 @@ export function NoContent() {
         body: JSON.stringify({
           url,
         }),
-        // credentials: "same-origin",
       });
 
       if (!res.ok) {
@@ -53,7 +52,7 @@ export function NoContent() {
     <>
       <div className="mt-20 max-w-md text-4xl md:text-5xl lg:text-6xl">
         <h1 className="text-center text-foreground">
-          영상을
+          원하는 영상을
           <br /> 요약해보세요!
         </h1>
       </div>

@@ -61,7 +61,7 @@ export async function generateMarkdown(
     if (lang !== "ko") {
       const res = await generateText({
         model: google("gemini-2.0-flash-001"),
-        system: "translate to korean",
+        system: "Translate to korean. I want ONLY translated text. DO NOT INCLUDE ORIGINAL TEXT!",
         prompt: transcript,
       });
 

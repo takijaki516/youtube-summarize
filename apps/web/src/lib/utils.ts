@@ -18,3 +18,14 @@ export function extractVideoId(videoUrl: string): string {
   }
   throw new Error("Invalid YouTube video URL");
 }
+
+export function parseDuration(duration: string): number {
+  const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+  if (!match || !match[1] || !match[2] || !match[3]) return 0;
+
+  const hours = parseInt(match[1]) || 0;
+  const minutes = parseInt(match[2]) || 0;
+  const seconds = parseInt(match[3]) || 0;
+
+  return hours * 3600 + minutes * 60 + seconds;
+}

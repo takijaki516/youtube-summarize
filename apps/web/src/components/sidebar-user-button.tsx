@@ -47,7 +47,7 @@ export function SidebarUserButton() {
         <DropdownMenuItem className="p-0">
           <Button
             variant="destructive"
-            className="flex w-full justify-between"
+            className="flex w-full items-center justify-around"
             onClick={signOutHandler}
           >
             {isLoading ? (
@@ -55,7 +55,7 @@ export function SidebarUserButton() {
             ) : (
               <LogOut className="h-4 w-4" />
             )}
-            Sign Out
+            <span>로그아웃</span>
           </Button>
         </DropdownMenuItem>
       </DropdownMenuContent>

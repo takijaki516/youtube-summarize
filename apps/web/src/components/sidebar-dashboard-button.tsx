@@ -22,8 +22,8 @@ export function SidebarDashboardButton() {
         </Button>
       </TooltipTrigger>
 
-      <TooltipContent>
-        <p>Dashboard</p>
+      <TooltipContent side="right">
+        <p>대시보드</p>
       </TooltipContent>
     </Tooltip>
   );
