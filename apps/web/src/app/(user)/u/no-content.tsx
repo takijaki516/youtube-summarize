@@ -15,7 +15,7 @@ export function NoContent() {
 
   const generateSummary = async () => {
     if (!url) {
-      toast.error("Please enter a valid URL");
+      toast.error("올바른 유튜브 URL을 입력해주세요");
       return;
     }
 
@@ -31,18 +31,18 @@ export function NoContent() {
 
       if (!res.ok) {
         if (res.status === 429) {
-          toast.error("Rate limit exceeded. Please try again later.");
+          toast.error("한도 초과입니다. 잠시 후 다시 시도해주세요");
           return;
         }
 
-        toast.error("Failed to generate summary");
+        toast.error("요약 생성에 실패했습니다");
         return;
       }
 
       const vId = (await res.json()).vId;
       router.push(`/v/${vId}`);
     } catch (error) {
-      toast.error("Failed to generate summary");
+      toast.error("요약 생성에 실패했습니다");
     } finally {
       setIsLoading(false);
     }

@@ -6,8 +6,6 @@ import { NoContent } from "./no-content";
 import { RecentContents } from "./recent-contents";
 import { getSession } from "@/lib/queries/auth";
 
-export const dynamic = "force-dynamic";
-
 export default async function UserHomepage() {
   const session = await getSession();
 
@@ -18,7 +16,8 @@ export default async function UserHomepage() {
   const recentVideos = await drizzleClient
     .select()
     .from(schema.videosSchema)
-    .where(eq(schema.videosSchema.userId, session.user.id));
+    .where(eq(schema.videosSchema.userId, session.user.id))
+    .limit(1);
 
   return (
     <main className="flex flex-1 flex-col items-center overflow-auto bg-background px-4">

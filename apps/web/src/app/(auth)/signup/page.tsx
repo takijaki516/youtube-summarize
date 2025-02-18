@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader } from "lucide-react";
 import * as React from "react";
 import Link from "next/link";
 import { z } from "zod";
@@ -21,7 +22,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader } from "lucide-react";
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = React.useState(false);

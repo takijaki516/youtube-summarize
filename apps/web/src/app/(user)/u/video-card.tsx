@@ -26,14 +26,14 @@ export function VideoCard({ video }: { video: schema.Video }) {
       });
 
       if (!res.ok) {
-        toast.error("Failed to delete video");
+        toast.error("요약 삭제에 실패했습니다");
         return;
       }
 
       queryClient.invalidateQueries({ queryKey: ["videos"] });
-      toast.success("Video deleted successfully");
+      toast.success("요약을 삭제했습니다");
     } catch (error) {
-      toast.error("Failed to delete video");
+      toast.error("요약 삭제에 실패했습니다");
     } finally {
       setIsDeleting(false);
     }

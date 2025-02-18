@@ -31,12 +31,15 @@ export async function POST(req: Request) {
       });
     }
 
-    // 3 requests per 10 minutes per clientUUID
-    await checkRateLimit(clientUUID, 3, 10 * 60 * 1000);
+    // 3 requests per day per clientUUID
+    await checkRateLimit(clientUUID, 3, 24 * 60 * 60 * 1000);
 
     const { url } = await req.json();
     if (!url) {
-      return Response.json({ error: "URL is required" }, { status: 400 });
+      return Response.json(
+        { message: "유튜브 URL이 필요해요" },
+        { status: 400 },
+      );
     }
 
     const videoInfoRes = await getMinimalVideoInfoFromAPI(url);
@@ -92,7 +95,7 @@ export async function POST(req: Request) {
 
     if (!insertedVideo[0]) {
       return Response.json(
-        { error: "Failed to insert video" },
+        { message: "Failed to insert video" },
         { status: 500 },
       );
     }
@@ -116,9 +119,9 @@ export async function POST(req: Request) {
     console.error("Error in /api/guest:", error);
 
     if (error instanceof RateLimitError) {
-      return Response.json({ error: "Too many requests" }, { status: 429 });
+      return Response.json({ message: "Too many requests" }, { status: 429 });
     }
 
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+    return Response.json({ message: "Internal server error" }, { status: 500 });
   }
 }

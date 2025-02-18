@@ -80,7 +80,7 @@ export function RecentContents() {
             )}
 
             <li ref={ref} className="h-10">
-              {isFetchingNextPage ? "더 보기" : null}
+              {isFetchingNextPage ? "로딩중..." : null}
             </li>
           </>
         )}

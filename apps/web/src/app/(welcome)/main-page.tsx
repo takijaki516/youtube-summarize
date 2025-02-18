@@ -3,7 +3,7 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Send, RotateCw } from "lucide-react";
+import { Send, RotateCw, Info } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,7 @@ export function MainPage() {
     <main className="flex flex-col bg-background py-14">
       <section className="w-full">
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center space-y-10 text-center">
+          <div className="flex flex-col items-center gap-4 text-center">
             <motion.h1
               className="max-w-xl text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl"
               initial={{ opacity: 0, y: 20 }}
@@ -60,7 +60,7 @@ export function MainPage() {
             </motion.h1>
 
             <motion.p
-              className="max-w-[700px] text-xl text-foreground md:text-2xl"
+              className="mt-8 max-w-[700px] text-xl text-foreground md:text-2xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
@@ -69,7 +69,7 @@ export function MainPage() {
             </motion.p>
 
             <motion.div
-              className="relative mt-10 w-full max-w-md"
+              className="relative mt-4 w-full max-w-md"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
@@ -94,14 +94,21 @@ export function MainPage() {
             </motion.div>
 
             <motion.div
-              className="relative mt-10 w-full max-w-md"
+              className="relative flex w-full max-w-md flex-col gap-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
             >
-              <span className="text-muted-foreground/70">
-                현재는 30분 이하의 동영상만 처리 가능합니다.
-              </span>
+              <div className="mt-2 flex w-full items-center justify-center gap-2">
+                <Info className="size-4 text-muted-foreground/70" />
+                <span className="text-sm text-muted-foreground/90">
+                  현재는 30분 이하의 동영상만 처리 가능합니다.
+                </span>
+              </div>
+
+              <div className="flex w-full items-center justify-center text-sm text-muted-foreground/90">
+                로그인시 하루 10개 무료로 요약가능해요
+              </div>
             </motion.div>
           </div>
         </div>

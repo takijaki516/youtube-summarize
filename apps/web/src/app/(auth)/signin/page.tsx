@@ -76,9 +76,7 @@ export default function LoginPage() {
                 {...form.register("email")}
               />
               {form.formState.errors.email && (
-                <p className="text-sm text-red-500">
-                  이메일을 올바르게 입력해주세요
-                </p>
+                <p className="text-sm text-red-500">올바르지 않은 정보</p>
               )}
             </div>
 
@@ -91,7 +89,7 @@ export default function LoginPage() {
                 {...form.register("password")}
               />
               {form.formState.errors.password && (
-                <p className="text-sm text-red-500">비밀번호가 필요합니다</p>
+                <p className="text-sm text-red-500">올바르지 않은 정보</p>
               )}
             </div>
 

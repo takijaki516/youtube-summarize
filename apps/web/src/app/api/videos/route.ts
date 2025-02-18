@@ -36,5 +36,8 @@ export const DELETE = async function DELETE(request: Request) {
     .delete(schema.videosSchema)
     .where(eq(schema.videosSchema.id, +id));
 
-  return Response.json({ message: "Video deleted successfully" });
+  return Response.json(
+    { message: "Video deleted successfully" },
+    { status: 200 },
+  );
 };
