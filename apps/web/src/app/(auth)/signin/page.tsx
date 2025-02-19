@@ -55,6 +55,22 @@ export default function LoginPage() {
     setIsLoading(false);
   };
 
+  const googleLogin = async () => {
+    setIsLoading(true);
+
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/u",
+      fetchOptions: {
+        onSuccess: () => {
+          toast.success("회원가입 완료");
+        },
+      },
+    });
+
+    setIsLoading(false);
+  };
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center">
       <Card className="mx-auto w-full max-w-md rounded-none bg-white p-4 shadow-input dark:bg-black md:rounded-2xl md:p-8">
@@ -94,7 +110,12 @@ export default function LoginPage() {
             </div>
 
             <div className="flex flex-col items-center gap-1.5 sm:flex-row">
-              <Button className="w-full" type="submit" variant={"outline"}>
+              <Button
+                className="w-full"
+                type="submit"
+                variant={"outline"}
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <Loader className="size-4 w-full animate-spin" />
                 ) : (
@@ -106,9 +127,17 @@ export default function LoginPage() {
                 className="flex w-full items-center gap-1.5"
                 type="button"
                 variant={"outline"}
+                onClick={googleLogin}
+                disabled={isLoading}
               >
-                <GoogleIcon className="size-4" />
-                구글 로그인
+                {isLoading ? (
+                  <Loader className="size-4 animate-spin" />
+                ) : (
+                  <>
+                    <GoogleIcon className="size-4" />
+                    <span>구글 로그인</span>
+                  </>
+                )}
               </Button>
             </div>
           </form>

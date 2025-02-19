@@ -57,8 +57,24 @@ export default function SignupPage() {
           toast.error("회원가입에 실패했어요. 다시 시도해주세요");
         },
         onSuccess: () => {
-          toast.success("회원가입에 성공했어요");
+          toast.success("회원가입 완료");
           router.push("/u");
+        },
+      },
+    });
+
+    setIsLoading(false);
+  };
+
+  const googleLogin = async () => {
+    setIsLoading(true);
+
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/u",
+      fetchOptions: {
+        onSuccess: () => {
+          toast.success("회원가입 완료");
         },
       },
     });
@@ -124,7 +140,12 @@ export default function SignupPage() {
             </div>
 
             <div className="flex flex-col items-center gap-1.5 sm:flex-row">
-              <Button className="w-full" type="submit" variant={"outline"}>
+              <Button
+                className="w-full"
+                type="submit"
+                variant={"outline"}
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <Loader className="size-4 animate-spin" />
                 ) : (
@@ -136,9 +157,17 @@ export default function SignupPage() {
                 className="flex w-full items-center gap-1.5"
                 type="button"
                 variant={"outline"}
+                onClick={googleLogin}
+                disabled={isLoading}
               >
-                <GoogleIcon className="size-4" />
-                구글 로그인
+                {isLoading ? (
+                  <Loader className="size-4 animate-spin" />
+                ) : (
+                  <>
+                    <GoogleIcon className="size-4" />
+                    <span>구글 로그인</span>
+                  </>
+                )}
               </Button>
             </div>
           </form>
