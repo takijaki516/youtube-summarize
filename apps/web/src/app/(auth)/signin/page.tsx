@@ -60,9 +60,9 @@ export default function LoginPage() {
 
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/u",
       fetchOptions: {
         onSuccess: () => {
+          router.push("/u");
           toast.success("회원가입 완료");
         },
       },

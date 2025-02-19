@@ -57,8 +57,8 @@ export default function SignupPage() {
           toast.error("회원가입에 실패했어요. 다시 시도해주세요");
         },
         onSuccess: () => {
-          toast.success("회원가입 완료");
           router.push("/u");
+          toast.success("회원가입 완료");
         },
       },
     });
@@ -71,9 +71,9 @@ export default function SignupPage() {
 
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/u",
       fetchOptions: {
         onSuccess: () => {
+          router.push("/u");
           toast.success("회원가입 완료");
         },
       },
