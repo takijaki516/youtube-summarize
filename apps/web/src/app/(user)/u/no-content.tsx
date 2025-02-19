@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Send, RotateCw } from "lucide-react";
+import { Send, RotateCw, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -75,6 +75,13 @@ export function NoContent() {
         >
           {isLoading ? <RotateCw className="animate-spin" /> : <Send />}
         </Button>
+      </div>
+
+      <div className="mt-2 flex w-full max-w-md items-center justify-center gap-2">
+        <Info className="size-4 text-muted-foreground/70" />
+        <span className="text-sm text-muted-foreground/90">
+          현재는 30분 이하의 동영상만 처리 가능합니다.
+        </span>
       </div>
     </>
   );
