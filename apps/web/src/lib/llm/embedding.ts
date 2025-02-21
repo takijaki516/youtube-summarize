@@ -4,7 +4,7 @@ import pgvector from "pgvector";
 import { drizzleClient, schema } from "@repo/database";
 
 import type {
-  RequestOptions,
+  LLMRequest,
   SimilarSearchResult,
   TranscriptSegment,
 } from "@/types/types";
@@ -23,7 +23,7 @@ export async function getEmbeddings(
 
 export async function embedTranscript(
   transcript: TranscriptSegment[],
-  { videoSchemaId, userId, isGuest, clientUUID }: RequestOptions,
+  { videoSchemaId, userId, isGuest, clientUUID }: LLMRequest,
 ): Promise<void> {
   const chunkSize = 100;
 
@@ -60,7 +60,7 @@ export async function embedTranscript(
 
 export async function similarText(
   text: string,
-  { videoSchemaId, clientUUID, isGuest, userId }: RequestOptions,
+  { videoSchemaId, clientUUID, isGuest, userId }: LLMRequest,
 ): Promise<SimilarSearchResult> {
   const queryEmbedding = await getEmbeddings([text]);
   const pgQueryEmbedding = pgvector.toSql(queryEmbedding[0]);

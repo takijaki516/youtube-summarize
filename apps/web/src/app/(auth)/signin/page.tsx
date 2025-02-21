@@ -43,16 +43,16 @@ export default function LoginPage() {
       password: data.password,
       fetchOptions: {
         onError: () => {
+          setIsLoading(false);
           toast.error("로그인에 실패했어요. 다시 시도해주세요");
         },
         onSuccess: () => {
-          toast.success("로그인 했어요");
+          setIsLoading(false);
           router.push("/u");
+          toast.success("로그인");
         },
       },
     });
-
-    setIsLoading(false);
   };
 
   const googleLogin = async () => {
@@ -61,14 +61,17 @@ export default function LoginPage() {
     await authClient.signIn.social({
       provider: "google",
       fetchOptions: {
+        onError: () => {
+          setIsLoading(false);
+          toast.error("로그인에 실패했어요. 다시 시도해주세요");
+        },
         onSuccess: () => {
+          setIsLoading(false);
           router.push("/u");
-          toast.success("회원가입 완료");
+          toast.success("로그인");
         },
       },
     });
-
-    setIsLoading(false);
   };
 
   return (

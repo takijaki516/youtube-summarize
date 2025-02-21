@@ -4,7 +4,7 @@ import { drizzleClient, schema } from "@repo/database";
 
 import { YoutubeTranscript } from "../youtube-transcript";
 import { similarText } from "./embedding";
-import type { RequestOptions, TranscriptSegment } from "@/types/types";
+import type { LLMRequest, TranscriptSegment } from "@/types/types";
 import { google } from "./google";
 
 export async function getTranscript(url: string): Promise<TranscriptSegment[]> {
@@ -39,12 +39,12 @@ export async function generateMarkdown(
   transcript: string,
   url: string,
   lang: string,
-  { videoSchemaId, isGuest, userId, clientUUID }: RequestOptions,
+  { videoSchemaId, isGuest, userId, clientUUID }: LLMRequest,
 ) {
   const placeholders = transcript.match(/<.+?>/g);
 
   if (!placeholders) {
-    return;
+    return null;
   }
 
   if (isGuest) {
@@ -57,29 +57,6 @@ export async function generateMarkdown(
 
       transcript = transcript.replace(placeholder, replacementText);
     }
-
-    if (lang !== "ko") {
-      const res = await generateText({
-        model: google("gemini-2.0-flash-001"),
-        system: "Translate to korean. I want ONLY translated text. DO NOT INCLUDE ORIGINAL TEXT!",
-        prompt: transcript,
-      });
-
-      await drizzleClient
-        .update(schema.tempVideosSchema)
-        .set({
-          summary: transcript,
-          translatedSummary: res.text,
-        })
-        .where(eq(schema.tempVideosSchema.id, videoSchemaId));
-    } else {
-      await drizzleClient
-        .update(schema.tempVideosSchema)
-        .set({
-          summary: transcript,
-        })
-        .where(eq(schema.tempVideosSchema.id, videoSchemaId));
-    }
   } else {
     // not guest
     for (const placeholder of placeholders) {
@@ -90,36 +67,15 @@ export async function generateMarkdown(
 
       transcript = transcript.replace(placeholder, replacementText);
     }
-
-    if (lang !== "ko") {
-      const res = await generateText({
-        model: google("gemini-2.0-flash-001"),
-        system: "translate to korean",
-        prompt: transcript,
-      });
-
-      await drizzleClient
-        .update(schema.videosSchema)
-        .set({
-          summary: transcript,
-          translatedSummary: res.text,
-        })
-        .where(eq(schema.videosSchema.id, videoSchemaId));
-    } else {
-      await drizzleClient
-        .update(schema.videosSchema)
-        .set({
-          summary: transcript,
-        })
-        .where(eq(schema.videosSchema.id, videoSchemaId));
-    }
   }
+
+  return transcript;
 }
 
 async function processPlaceholder(
   placeholder: string,
   url: string,
-  { videoSchemaId, userId, isGuest, clientUUID }: RequestOptions,
+  { videoSchemaId, userId, isGuest, clientUUID }: LLMRequest,
 ) {
   let sanitizedURL = url.replace(/[?&]t=\d+s?/, "");
 

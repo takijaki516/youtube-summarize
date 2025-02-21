@@ -1,15 +1,24 @@
+import { redirect } from "next/navigation";
+import { generateText } from "ai";
 import { eq } from "drizzle-orm";
 import { drizzleClient, schema } from "@repo/database";
 
-import { MarkdownRenderer } from "@/components/markdown-renderer";
-import { YouTubePlayer } from "@/components/youtube-player";
-import { ResizableView } from "@/components/resizable-view";
+import { google } from "@/lib/llm/google";
+import { generateMarkdown } from "@/lib/llm/transcript";
+import { getSession } from "@/lib/queries/auth";
+import { SummaryView } from "../../../../components/summary-view";
 
 export default async function VideoPage({
   params,
 }: {
   params: { id: string };
 }) {
+  const session = await getSession();
+
+  if (!session) {
+    return redirect("/");
+  }
+
   const video = await drizzleClient
     .select()
     .from(schema.videosSchema)
@@ -20,21 +29,21 @@ export default async function VideoPage({
     return <div>Not found</div>;
   }
 
-  const summary =
-    video[0].originalTranscriptLanguage !== "ko"
-      ? video[0].translatedSummary
-      : video[0].summary;
+  const { originalTranscriptLanguage, id, url, translatedSummary, summary } =
+    video[0];
 
   if (!summary) {
-    return <div>Not found</div>;
+    return <div>ERROR</div>;
   }
 
   return (
     <main className="flex flex-1 items-center bg-background">
-      <ResizableView>
-        <YouTubePlayer videoId={video[0].videoId} />
-        <MarkdownRenderer content={summary} />
-      </ResizableView>
+      <SummaryView
+        videoId={video[0].videoId}
+        originalLanguage={originalTranscriptLanguage}
+        originalSummary={summary}
+        translatedSummary={translatedSummary}
+      />
     </main>
   );
 }

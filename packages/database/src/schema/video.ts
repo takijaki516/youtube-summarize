@@ -6,8 +6,12 @@ export const videosSchema = pgTable("video", {
   id: serial("id").primaryKey(),
   url: text("url").notNull(),
   title: text("title").notNull(),
-  summary: text("summary").notNull(),
+
   originalTranscriptLanguage: text("originalTranscriptLanguage").notNull(),
+
+  rawSummary: text("raw_summary"),
+  summary: text("summary"),
+  // korean
   translatedSummary: text("translatedSummary"),
 
   userId: text("userId")

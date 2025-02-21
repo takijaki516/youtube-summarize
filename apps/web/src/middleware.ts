@@ -1,7 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const publicRoutes = ["/"];
 const authPages = ["/signin", "/signup"];
 
 // just check for routing purpose in the middleware
@@ -21,30 +20,32 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // public(guest) routes
+  // user(private) routes
   if (
-    publicRoutes.includes(req.nextUrl.pathname) ||
-    req.nextUrl.pathname.startsWith("/guest")
+    req.nextUrl.pathname.startsWith("/u") ||
+    req.nextUrl.pathname.startsWith("/v")
   ) {
+    // not logged in
     if (
-      req.cookies.has(authCookieName) ||
-      req.cookies.has(authSecureCookieName)
+      !req.cookies.has(authCookieName) &&
+      !req.cookies.has(authSecureCookieName)
     ) {
-      return NextResponse.redirect(new URL("/u", req.url));
+      return NextResponse.redirect(new URL("/signin", req.url));
     }
 
     return NextResponse.next();
   }
 
-  // private routes
+  // public(guest) routes and logged in
   if (
-    !(
-      req.cookies.has("__Secure-better-auth.session_token") ||
-      req.cookies.has("better-auth.session_token")
-    )
+    req.cookies.has(authCookieName) ||
+    req.cookies.has(authSecureCookieName)
   ) {
-    return NextResponse.redirect(new URL("/signin", req.url));
+    return NextResponse.redirect(new URL("/u", req.url));
   }
+
+  // public(guest) routes
+  return NextResponse.next();
 }
 
 // REVIEW:

@@ -4,8 +4,12 @@ export const tempVideosSchema = pgTable("tempVideo", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   url: text("url").notNull(),
-  summary: text("summary").notNull(),
+
   originalTranscriptLanguage: text("originalTranscriptLanguage").notNull(),
+
+  rawSummary: text("raw_summary"),
+  summary: text("summary"),
+  // korean
   translatedSummary: text("translatedSummary"),
 
   clientUUID: text("clientUUID").notNull(),

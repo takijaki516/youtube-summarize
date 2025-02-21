@@ -1,0 +1,1 @@
+ALTER TABLE "video" ADD COLUMN "raw_summary" text;

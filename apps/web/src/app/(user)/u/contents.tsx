@@ -6,8 +6,8 @@ import { useInView } from "react-intersection-observer";
 import { schema } from "@repo/database";
 
 import { useDebounce } from "@/lib/hooks/use-debounce";
-import { Input } from "@/components/ui/input";
 import { VideoCard } from "./video-card";
+import { Input } from "@/components/ui/input";
 
 interface VideosResponse {
   videos: schema.Video[];
@@ -15,24 +15,10 @@ interface VideosResponse {
   totalCount: number;
 }
 
-export function RecentContents() {
+export function Contents() {
   const [search, setSearch] = React.useState("");
   const debouncedSearch = useDebounce(search, 500);
   const { ref, inView } = useInView();
-
-  async function fetchVideos({ pageParam = 1 }): Promise<VideosResponse> {
-    const response = await fetch(
-      `/api/videos?page=${pageParam}&limit=10&search=${encodeURIComponent(
-        debouncedSearch,
-      )}`,
-    );
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
-    return response.json();
-  }
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
@@ -48,21 +34,33 @@ export function RecentContents() {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
-  return (
-    <div className="flex w-full max-w-3xl flex-col">
-      <h1 className="mt-32 text-center text-4xl font-bold">최신 컨텐츠</h1>
+  async function fetchVideos({ pageParam = 1 }): Promise<VideosResponse> {
+    const response = await fetch(
+      `/api/videos?page=${pageParam}&limit=10&search=${encodeURIComponent(
+        debouncedSearch,
+      )}`,
+    );
 
-      <div className="mt-8 w-full">
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    return response.json();
+  }
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="mt-8 flex w-full flex-col items-center gap-2">
         <Input
           type="text"
-          placeholder="찾아보기..."
+          placeholder="제목으로 검색..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-md focus:outline-none"
+          className="w-full max-w-md rounded-md focus:outline-none"
         />
       </div>
 
-      <ul className="mt-14 flex flex-col gap-4">
+      <ul className="mt-8 flex flex-col gap-4">
         {status === "pending" ? (
           <div>찾는중...</div>
         ) : status === "error" ? (

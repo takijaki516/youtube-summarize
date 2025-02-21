@@ -2,9 +2,7 @@ import { cookies } from "next/headers";
 import { and, eq } from "drizzle-orm";
 import { drizzleClient, schema } from "@repo/database";
 
-import { MarkdownRenderer } from "@/components/markdown-renderer";
-import { YouTubePlayer } from "@/components/youtube-player";
-import { ResizableView } from "@/components/resizable-view";
+import { SummaryView } from "@/components/summary-view";
 
 export default async function GuestPage({
   params,
@@ -33,21 +31,20 @@ export default async function GuestPage({
     return <div>Not found</div>;
   }
 
-  const summary =
-    video[0].originalTranscriptLanguage !== "ko"
-      ? video[0].translatedSummary
-      : video[0].summary;
+  const { originalTranscriptLanguage, translatedSummary, summary } = video[0];
 
   if (!summary) {
-    return <div>Not found</div>;
+    return <div>error</div>;
   }
 
   return (
     <main className="container h-full flex-1 overflow-hidden">
-      <ResizableView>
-        <YouTubePlayer videoId={video[0].videoId} />
-        <MarkdownRenderer content={summary} />
-      </ResizableView>
+      <SummaryView
+        videoId={video[0].videoId}
+        originalLanguage={originalTranscriptLanguage}
+        originalSummary={summary}
+        translatedSummary={translatedSummary}
+      />
     </main>
   );
 }

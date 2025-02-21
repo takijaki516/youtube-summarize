@@ -1,8 +1,8 @@
-import { generateText } from "ai";
+import { streamText } from "ai";
 
 import { google } from "./google";
 
-const SYSTEMPROMPT = `You are an expert at summarizing and structuring content into a comprehensive guide.
+export const SUMMARY_SYSTEMPROMPT = `You are an expert at summarizing and structuring content into a comprehensive guide.
 
 Given a transcript from a video, you are tasked with creating a structured guide that encapsulates the main points and ideas discussed in the video.
 - Guide should include chapters, key summaries, and direct links to relevant parts of the video. (Create titles or headings that encapsulate main points and ideas!)
@@ -26,20 +26,17 @@ Hi everyone. So in this video I'd like us to cover the process of tokenization i
 
 example output:
 
-Introduction to Tokenization
-----------------------------
+# Introduction to Tokenization
 
 Welcome to our comprehensive guide on tokenization in large language models (LLMs). Tokenization is a critical yet complex aspect of working with LLMs, essential for understanding how these models process text data. Despite its challenges, tokenization is foundational, as it converts strings of text into sequences of tokens, small units of text that LLMs can manage more effectively.
 
-Understanding the Basics of Tokenization
-----------------------------------------
+## Understanding the Basics of Tokenization
 
 Tokenization involves creating a vocabulary from all unique characters or words in a dataset and converting each into a corresponding integer token. This process was briefly introduced in our "Let's Build GPT from Scratch" video, where we tokenized a Shakespeare dataset at a character level, creating a vocabulary of 65 possible characters.
 
 <HYPERLINK: So what is tokenization? Now in my previous video Let's Build GPT from Scratch we actually already did tokenization but we did a very naive simple version of tokenization. So when you go to the Google Colab for that video you see here that we loaded>
 
-The Role of Embedding Tables in Tokenization
---------------------------------------------
+## The Role of Embedding Tables in Tokenization
 
 After tokenization, the next step involves using an embedding table, where each token's integer is used as a lookup to extract a row of trainable parameters. These parameters, once trained, feed into the transformer model, allowing it to perceive each token effectively.
 
@@ -49,18 +46,11 @@ Remember to Create titles or headings that encapsulate main points and ideas!!!
 Also remember to match the language of the transcript AT ALL COSTS!!!
 `;
 
-export async function generateSummary(transcript: string): Promise<string> {
-  try {
-    const response = await generateText({
-      model: google("gemini-2.0-flash-001"),
-      system: SYSTEMPROMPT,
-      prompt: `Here is the transcript: ${transcript}. This is very important to me!! TRY YOUR BEST!!!`,
-      temperature: 0.1,
-    });
-
-    return response.text;
-  } catch (error) {
-    console.error("Error generating summary:", error);
-    throw new Error("Failed to generate summary");
-  }
+export async function streamSummary(transcript: string) {
+  return streamText({
+    model: google("gemini-2.0-flash-001"),
+    system: SUMMARY_SYSTEMPROMPT,
+    prompt: `Here is the transcript: ${transcript}. This is very important to me!! TRY YOUR BEST!!!`,
+    temperature: 0.1,
+  });
 }

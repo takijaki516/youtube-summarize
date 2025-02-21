@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
 
-import { drizzleClient, schema } from "@repo/database";
-import { NoContent } from "./no-content";
-import { RecentContents } from "./recent-contents";
 import { getSession } from "@/lib/queries/auth";
+import { GenerateSummary } from "./generate-summary";
+import { Contents } from "./contents";
+import { drizzleClient, schema } from "@repo/database";
+import { eq } from "drizzle-orm";
 
 export default async function UserHomepage() {
   const session = await getSession();
@@ -13,15 +13,18 @@ export default async function UserHomepage() {
     return redirect("/");
   }
 
-  const recentVideos = await drizzleClient
-    .select()
-    .from(schema.videosSchema)
-    .where(eq(schema.videosSchema.userId, session.user.id))
+  const userLimitStatus = await drizzleClient
+    .select({
+      count: schema.userRateLimitSchema.count,
+    })
+    .from(schema.userRateLimitSchema)
+    .where(eq(schema.userRateLimitSchema.userId, session.user.id))
     .limit(1);
 
   return (
     <main className="flex flex-1 flex-col items-center overflow-auto bg-background px-4">
-      {recentVideos.length > 0 ? <RecentContents /> : <NoContent />}
+      <GenerateSummary count={userLimitStatus[0]?.count ?? 0} />
+      <Contents />
     </main>
   );
 }

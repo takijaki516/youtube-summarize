@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Star } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 
@@ -21,6 +22,11 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           h1({ node, children, ...props }) {
             return (
               <h1 className="mb-6 text-2xl font-medium sm:text-3xl" {...props}>
+                <div className="flex items-start gap-px text-pink-500">
+                  <Star className="size-4" />
+                  <Star className="size-4" />
+                  <Star className="size-4" />
+                </div>
                 {children}
               </h1>
             );
@@ -28,6 +34,11 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           h2({ node, children, ...props }) {
             return (
               <h2 className="mb-2 text-lg font-medium sm:text-xl" {...props}>
+                <div className="flex items-start gap-px text-pink-500">
+                  <Star className="size-4" />
+
+                  <Star className="size-4" />
+                </div>
                 {children}
               </h2>
             );
@@ -35,6 +46,9 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           h3({ node, children, ...props }) {
             return (
               <h3 className="mb-1 text-base font-medium sm:text-lg" {...props}>
+                <div className="flex items-start gap-px text-pink-500">
+                  <Star className="size-4" />
+                </div>
                 {children}
               </h3>
             );
@@ -56,7 +70,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
             return (
               <span
                 onClick={() => setStartTime(timestamp)}
-                className="ml-1 text-green-500 underline underline-offset-2 opacity-70 transition-opacity duration-200 hover:cursor-pointer hover:opacity-100"
+                className="ml-1 underline underline-offset-2 opacity-60 transition-opacity duration-200 hover:cursor-pointer hover:opacity-100"
               >
                 {children}
               </span>

@@ -54,16 +54,16 @@ export default function SignupPage() {
       name: name,
       fetchOptions: {
         onError: () => {
+          setIsLoading(false);
           toast.error("회원가입에 실패했어요. 다시 시도해주세요");
         },
         onSuccess: () => {
+          setIsLoading(false);
           router.push("/u");
           toast.success("회원가입 완료");
         },
       },
     });
-
-    setIsLoading(false);
   };
 
   const googleLogin = async () => {
@@ -72,14 +72,17 @@ export default function SignupPage() {
     await authClient.signIn.social({
       provider: "google",
       fetchOptions: {
+        onError: () => {
+          setIsLoading(false);
+          toast.error("회원가입에 실패했어요. 다시 시도해주세요");
+        },
         onSuccess: () => {
+          setIsLoading(false);
           router.push("/u");
           toast.success("회원가입 완료");
         },
       },
     });
-
-    setIsLoading(false);
   };
 
   return (
