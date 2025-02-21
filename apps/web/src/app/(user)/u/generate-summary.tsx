@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { type Message, useChat } from "ai/react";
 
 import { TRANSCRIPT_STATUS_KEYS } from "@/types/types";
+import { cn } from "@/lib/utils";
 import { TranscriptStatus } from "@/components/transcript-status";
 import {
   Sheet,
@@ -16,7 +17,6 @@ import {
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 export interface GenerateSummaryProps {
   count: number;
@@ -30,7 +30,7 @@ export function GenerateSummary({ count }: GenerateSummaryProps) {
   const { messages, handleSubmit, data, setData, setMessages, stop } = useChat({
     api: "/api/transcript",
     credentials: "same-origin",
-    onError: (error) => {
+    onError: () => {
       stop();
       toast.error(
         "요약에 실패하였어요. 다시 시도해주세요. 요약실패시 횟수를 차감하지 않아요.",

@@ -26,7 +26,7 @@ export function GuestGenerateSummary() {
   const { messages, handleSubmit, data, setData, setMessages, stop } = useChat({
     api: "/api/guest",
     credentials: "same-origin",
-    onError: (error) => {
+    onError: () => {
       stop();
       toast.error("요약에 실패하였어요. 다시 시도해주세요");
       setIsSheetOpen(false);

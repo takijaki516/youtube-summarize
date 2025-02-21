@@ -3,7 +3,7 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 
-import { GuestGenerateSummary } from "./generate-summary";
+import { GuestGenerateSummary } from "./guest-generate-summary";
 
 export default function WelcomePage() {
   return (

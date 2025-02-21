@@ -5,8 +5,8 @@ import { Calendar, Loader2, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-
 import { schema } from "@repo/database";
+
 import { Button } from "@/components/ui/button";
 
 export function VideoCard({ video }: { video: schema.Video }) {
