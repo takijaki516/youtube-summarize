@@ -8,12 +8,12 @@ import { createSummaryStream } from "@/lib/llm/stream-factory";
 export const POST = async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: req.headers });
   if (!session) {
-    return Response.json({ message: "Unauthorized" }, { status: 401 });
+    return Response.json({ message: "인증되지 않음" }, { status: 401 });
   }
 
   const { videoUrl } = await req.json();
   if (!videoUrl) {
-    return Response.json({ error: "URL is required" }, { status: 400 });
+    return Response.json({ error: "올바르지 않은 URL" }, { status: 400 });
   }
 
   const userId = session.user.id;

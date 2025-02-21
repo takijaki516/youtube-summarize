@@ -8,16 +8,16 @@ import { createSummaryStream } from "@/lib/llm/stream-factory";
 export async function POST(req: Request) {
   const { videoUrl } = await req.json();
   if (!videoUrl) {
-    return Response.json({ message: "유튜브 URL이 필요해요" }, { status: 400 });
+    return Response.json({ message: "올바르지 않은 URL" }, { status: 400 });
   }
 
+  // NOTE: identifying guest users by cookie
   const cookieStore = cookies();
   let clientUUID = cookieStore.get("clientUUID")?.value;
 
   if (!clientUUID) {
     clientUUID = uuidv4();
 
-    // REVIEW:
     cookieStore.set("clientUUID", clientUUID, {
       httpOnly: true,
       path: "/",

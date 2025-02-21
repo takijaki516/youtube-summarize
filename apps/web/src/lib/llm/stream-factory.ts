@@ -27,7 +27,7 @@ export function createSummaryStream(
       const duration = videoInfoRes.duration;
 
       if (duration > 1800) {
-        throw new Error("Video is longer than 30 minutes");
+        throw new Error("영상 길이가 30분 이상입니다.");
       }
 
       const videoTitle = videoInfoRes.title;
@@ -41,7 +41,7 @@ export function createSummaryStream(
 
       const originalTranscriptLanguage = transcripts[0]?.lang;
       if (!originalTranscriptLanguage) {
-        throw new Error("Failed to get transcript");
+        throw new Error("영상 데이터 수집 실패");
       }
 
       const mergedTranscript = mergeTranscript(transcripts);
@@ -90,7 +90,7 @@ export function createSummaryStream(
           }
 
           if (!insertedVideo[0]) {
-            throw new Error("Failed to insert video");
+            throw new Error("비디오 저장 실패");
           }
 
           //
@@ -106,7 +106,6 @@ export function createSummaryStream(
           const generatedMarkdown = await generateMarkdown(
             rawGeneratedSummary,
             videoUrl,
-            originalTranscriptLanguage,
             {
               videoSchemaId: insertedVideo[0].id,
               ...llmRequestOptions,
@@ -114,7 +113,7 @@ export function createSummaryStream(
           );
 
           if (!generatedMarkdown) {
-            throw new Error("Failed to generate markdown");
+            throw new Error("요약생성 실패");
           }
 
           //
@@ -222,10 +221,9 @@ export function createSummaryStream(
 
       summaryStream.mergeIntoDataStream(dataStream);
     },
-    // FIXME:
     onError: (error) => {
       if (error instanceof Error) return error.message;
-      return "error";
+      return "에러 발생";
     },
   });
 }

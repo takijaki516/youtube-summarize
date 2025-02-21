@@ -53,9 +53,13 @@ export default function SignupPage() {
       password: password,
       name: name,
       fetchOptions: {
-        onError: () => {
+        onError: (ctx) => {
           setIsLoading(false);
-          toast.error("회원가입에 실패했어요. 다시 시도해주세요");
+          if (ctx.error.code === "USER_ALREADY_EXISTS") {
+            toast.error("이미 가입된 이메일입니다.");
+          } else {
+            toast.error("회원가입에 실패했어요. 다시 시도해주세요");
+          }
         },
         onSuccess: () => {
           setIsLoading(false);
@@ -122,7 +126,7 @@ export default function SignupPage() {
               />
               {form.formState.errors.password && (
                 <p className="text-sm text-red-500">
-                  비밀번호가 일치하지 않습니다.
+                  비밀번호는 8자 이상이어야 합니다.
                 </p>
               )}
             </div>

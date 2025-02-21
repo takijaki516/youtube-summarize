@@ -1,12 +1,9 @@
 import { redirect } from "next/navigation";
-import { generateText } from "ai";
 import { eq } from "drizzle-orm";
 import { drizzleClient, schema } from "@repo/database";
 
-import { google } from "@/lib/llm/google";
-import { generateMarkdown } from "@/lib/llm/transcript";
 import { getSession } from "@/lib/queries/auth";
-import { SummaryView } from "../../../../components/summary-view";
+import { SummaryView } from "@/components/summary-view";
 
 export default async function VideoPage({
   params,

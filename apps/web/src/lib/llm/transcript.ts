@@ -1,11 +1,6 @@
-import { generateText } from "ai";
-import { eq } from "drizzle-orm";
-import { drizzleClient, schema } from "@repo/database";
-
 import { YoutubeTranscript } from "../youtube-transcript";
 import { similarText } from "./embedding";
 import type { LLMRequest, TranscriptSegment } from "@/types/types";
-import { google } from "./google";
 
 export async function getTranscript(url: string): Promise<TranscriptSegment[]> {
   const transcripts = await YoutubeTranscript.fetchTranscript(url);
@@ -38,7 +33,6 @@ export function mergeTranscript(transcripts: TranscriptSegment[]): string {
 export async function generateMarkdown(
   transcript: string,
   url: string,
-  lang: string,
   { videoSchemaId, isGuest, userId, clientUUID }: LLMRequest,
 ) {
   const placeholders = transcript.match(/<.+?>/g);

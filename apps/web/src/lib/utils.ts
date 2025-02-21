@@ -16,7 +16,7 @@ export function extractVideoId(videoUrl: string): string {
     id = url.pathname.slice(1);
     if (id) return id;
   }
-  throw new Error("Invalid YouTube video URL");
+  throw new Error("올바르지 않은 YouTube URL입니다.");
 }
 
 export function parseDuration(duration: string): number {
@@ -26,7 +26,6 @@ export function parseDuration(duration: string): number {
   // PT1H3S -> 3603 seconds
   // PT1H -> 3600 seconds
   // PT30S -> 30 seconds
-
   const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
   if (!match) return 0;
 
@@ -35,13 +34,4 @@ export function parseDuration(duration: string): number {
   const seconds = parseInt(match[3] || "0");
 
   return hours * 3600 + minutes * 60 + seconds;
-
-  // const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-  // if (!match) return 0;
-
-  // const hours = parseInt(match[1] || "0");
-  // const minutes = parseInt(match[2] || "0");
-  // const seconds = parseInt(match[3] || "0");
-
-  // return hours * 3600 + minutes * 60 + seconds;
 }

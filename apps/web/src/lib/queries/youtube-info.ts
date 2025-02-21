@@ -15,7 +15,7 @@ export async function getMinimalVideoInfoFromAPI(url: string) {
   };
 
   if (!data.items || !data.items[0]) {
-    throw new Error("Video not found");
+    throw new Error("비디오 정보를 가져올 수 없습니다.");
   }
 
   return {
