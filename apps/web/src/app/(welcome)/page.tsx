@@ -1,5 +1,6 @@
 "use client";
 
+import { Info } from "lucide-react";
 import * as React from "react";
 import { motion } from "framer-motion";
 
@@ -38,6 +39,19 @@ export default function WelcomePage() {
               transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
             >
               <GuestGenerateSummary />
+            </motion.div>
+
+            <motion.div
+              className="flex max-w-md gap-2 text-sm text-muted-foreground"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.6 }}
+            >
+              <Info className="mt-[2px] size-4" />
+              <span>
+                3무료로 3개의 동영상을 요약해드립니다.
+                <br /> 더 많은 요약을 원하시면 로그인해주세요.
+              </span>
             </motion.div>
           </div>
         </div>

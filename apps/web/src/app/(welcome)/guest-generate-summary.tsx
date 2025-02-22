@@ -40,7 +40,7 @@ export function GuestGenerateSummary() {
     },
   });
 
-  // NOTE:
+  // NOTE: for auto scrolling when new message comes in
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -98,9 +98,9 @@ export function GuestGenerateSummary() {
         </Button>
       </form>
 
-      <div className="mt-2 flex w-full max-w-md items-center justify-center gap-2">
-        <Info className="size-4 text-muted-foreground/70" />
-        <span className="text-sm text-muted-foreground/90">
+      <div className="mt-2 flex w-full max-w-md items-center justify-center gap-2 text-sm text-muted-foreground">
+        <Info className="size-4" />
+        <span className="text-muted-foreground">
           현재는 30분 이하의 동영상만 처리 가능합니다.
         </span>
       </div>
