@@ -33,7 +33,7 @@ export function GenerateSummary({ count }: GenerateSummaryProps) {
     onError: () => {
       stop();
       toast.error(
-        "요약에 실패하였어요. 다시 시도해주세요. 요약실패시 횟수를 차감하지 않아요.",
+        "해당 영상 요약에 실패하였어요. 다른 영상을 시도해보세요.\n 요약실패시 횟수를 차감하지 않아요.",
       );
       setIsSheetOpen(false);
     },

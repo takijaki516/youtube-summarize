@@ -28,7 +28,7 @@ export function GuestGenerateSummary() {
     credentials: "same-origin",
     onError: () => {
       stop();
-      toast.error("요약에 실패하였어요. 다시 시도해주세요");
+      toast.error("해당 영상 요약에 실패하였어요. 다른 영상을 시도해보세요.");
       setIsSheetOpen(false);
     },
     onResponse: (response) => {
