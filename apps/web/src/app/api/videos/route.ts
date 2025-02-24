@@ -49,11 +49,21 @@ export const GET = async function GET(request: Request) {
 };
 
 export const DELETE = async function DELETE(request: Request) {
+  const session = await auth.api.getSession({ headers: request.headers });
+  if (!session) {
+    return Response.json({ message: "인증되지 않음" }, { status: 401 });
+  }
+
   const { id } = await request.json();
 
   await drizzleClient
     .delete(schema.videosSchema)
-    .where(eq(schema.videosSchema.id, +id));
+    .where(
+      and(
+        eq(schema.videosSchema.id, +id),
+        eq(schema.videosSchema.userId, session.user.id),
+      ),
+    );
 
   return Response.json(
     { message: "Video deleted successfully" },
