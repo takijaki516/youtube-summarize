@@ -49,7 +49,7 @@ export default function WelcomePage() {
             >
               <Info className="mt-[2px] size-4" />
               <span>
-                3무료로 3개의 동영상을 요약해드립니다.
+                무료로 3개의 동영상을 요약해드립니다.
                 <br /> 더 많은 요약을 원하시면 로그인해주세요.
               </span>
             </motion.div>

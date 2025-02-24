@@ -1,7 +1,16 @@
 import { drizzleClient, schema } from "@repo/database";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
+
+import { auth } from "@/lib/auth";
 
 export const GET = async function GET(request: Request) {
+  const session = await auth.api.getSession({ headers: request.headers });
+  if (!session) {
+    return Response.json({ message: "인증되지 않음" }, { status: 401 });
+  }
+
+  const userId = session.user.id;
+
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get("page") ?? "1");
   const limit = parseInt(searchParams.get("limit") ?? "10");
@@ -11,7 +20,12 @@ export const GET = async function GET(request: Request) {
   const videos = await drizzleClient
     .select()
     .from(schema.videosSchema)
-    .where(sql`title ILIKE ${`%${search}%`}`)
+    .where(
+      and(
+        sql`title ILIKE ${`%${search}%`}`,
+        eq(schema.videosSchema.userId, userId),
+      ),
+    )
     .limit(limit)
     .offset(offset)
     .orderBy(desc(schema.videosSchema.updatedAt));
@@ -19,7 +33,12 @@ export const GET = async function GET(request: Request) {
   const totalCount = await drizzleClient
     .select({ count: sql`count(*)` })
     .from(schema.videosSchema)
-    .where(sql`title ILIKE ${`%${search}%`}`)
+    .where(
+      and(
+        sql`title ILIKE ${`%${search}%`}`,
+        eq(schema.videosSchema.userId, userId),
+      ),
+    )
     .then((res) => Number(res[0]?.count));
 
   return Response.json({
