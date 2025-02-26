@@ -46,7 +46,7 @@ export function GenerateSummary({ count }: GenerateSummaryProps) {
     },
   });
 
-  // NOTE:
+  // NOTE: for auto scroll
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {

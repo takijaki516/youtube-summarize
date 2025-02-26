@@ -3,21 +3,37 @@ import { similarText } from "./embedding";
 import type { LLMRequest, TranscriptSegment } from "@/types/types";
 
 export async function getTranscript(url: string): Promise<TranscriptSegment[]> {
-  const transcripts = await YoutubeTranscript.fetchTranscript(url);
+  const maxRetries = 3;
+  const retryDelay = 100;
+  let retryCount = 0;
 
-  let cur = 0;
+  while (retryCount < maxRetries) {
+    try {
+      const transcripts = await YoutubeTranscript.fetchTranscript(url);
 
-  // chunking transcript for embedding vectors
-  while (cur < transcripts.length - 1) {
-    if (transcripts[cur]!.text.length < 125) {
-      transcripts[cur]!.text += ` ${transcripts[cur + 1]!.text}`;
-      transcripts.splice(cur + 1, 1);
-    } else {
-      cur++;
+      let cur = 0;
+
+      // chunking transcript for embedding vectors
+      while (cur < transcripts.length - 1) {
+        if (transcripts[cur]!.text.length < 125) {
+          transcripts[cur]!.text += ` ${transcripts[cur + 1]!.text}`;
+          transcripts.splice(cur + 1, 1);
+        } else {
+          cur++;
+        }
+      }
+
+      return transcripts;
+    } catch (error) {
+      retryCount++;
+      if (retryCount === maxRetries) {
+        throw error; // Re-throw the error if max retries reached
+      }
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
     }
   }
 
-  return transcripts;
+  throw new Error("Maximum retry exceeds. Failed to fetch transcript");
 }
 
 export function mergeTranscript(transcripts: TranscriptSegment[]): string {
