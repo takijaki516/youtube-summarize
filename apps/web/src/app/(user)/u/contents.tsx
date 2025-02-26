@@ -58,7 +58,7 @@ export function Contents() {
         className="mt-8 w-full max-w-sm rounded-md focus:outline-none"
       />
 
-      <ul className="mt-8 flex flex-col gap-4">
+      <ul className="mt-8 flex w-full max-w-lg flex-col gap-4">
         {status === "pending" ? (
           <div>찾는중...</div>
         ) : status === "error" ? (
