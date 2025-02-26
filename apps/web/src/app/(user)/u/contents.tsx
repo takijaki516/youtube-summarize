@@ -49,16 +49,14 @@ export function Contents() {
   }
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="mt-8 flex w-full flex-col items-center gap-2">
-        <Input
-          type="text"
-          placeholder="제목으로 검색..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full max-w-md rounded-md focus:outline-none"
-        />
-      </div>
+    <div className="flex w-full max-w-lg flex-col items-center">
+      <Input
+        type="text"
+        placeholder="제목으로 검색..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="mt-8 w-full max-w-sm rounded-md focus:outline-none"
+      />
 
       <ul className="mt-8 flex flex-col gap-4">
         {status === "pending" ? (
