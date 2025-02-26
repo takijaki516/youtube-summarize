@@ -37,14 +37,14 @@ export default async function GuestPage({
     return <div>error</div>;
   }
 
+  let finalSummary = summary;
+  if (originalTranscriptLanguage !== "ko") {
+    finalSummary = translatedSummary as string;
+  }
+
   return (
     <main className="container h-full flex-1 overflow-hidden">
-      <SummaryView
-        videoId={video[0].videoId}
-        originalLanguage={originalTranscriptLanguage}
-        originalSummary={summary}
-        translatedSummary={translatedSummary}
-      />
+      <SummaryView videoId={video[0].videoId} summary={finalSummary} />
     </main>
   );
 }

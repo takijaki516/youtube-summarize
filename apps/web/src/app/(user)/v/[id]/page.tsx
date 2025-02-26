@@ -33,14 +33,14 @@ export default async function VideoPage({
     return <div>ERROR</div>;
   }
 
+  let finalSummary = summary;
+  if (originalTranscriptLanguage !== "ko") {
+    finalSummary = translatedSummary as string;
+  }
+
   return (
     <main className="flex flex-1 items-center bg-background">
-      <SummaryView
-        videoId={video[0].videoId}
-        originalLanguage={originalTranscriptLanguage}
-        originalSummary={summary}
-        translatedSummary={translatedSummary}
-      />
+      <SummaryView videoId={video[0].videoId} summary={finalSummary} />
     </main>
   );
 }
