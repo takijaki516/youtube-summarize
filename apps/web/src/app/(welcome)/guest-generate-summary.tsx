@@ -106,7 +106,7 @@ export function GuestGenerateSummary() {
       </div>
 
       {/* NOTE: set max height */}
-      <Sheet open={isSheetOpen} onOpenChange={(open) => setIsSheetOpen(open)}>
+      <Sheet open={isSheetOpen}>
         <SheetContent
           side="bottom"
           className="flex h-5/6 flex-col items-center"
